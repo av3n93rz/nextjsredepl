@@ -7,7 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from '@material-ui/lab/Alert';
 import ProductCard from '../Components/ProductCard'
 import Grid from '@material-ui/core/Grid';
-import Container from '@material-ui/core/Container';
+import {Container} from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {

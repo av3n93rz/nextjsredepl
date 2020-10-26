@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Head from 'next/head'
 import { makeStyles } from '@material-ui/core/styles';
 import Navbar from '../Components/Navbar'
-import Container from '@material-ui/Core/Container'
+import {Container} from '@material-ui/Core'
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
