@@ -9,6 +9,7 @@
     "heroku-postbuild": "npm run build"
   },
   "dependencies": {
+    "@emotion/styled": "^10.0.27",
     "@material-ui/core": "^5.0.0-alpha.14",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
@@ -16,6 +17,7 @@
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
+    "emotion": "^10.0.27",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "jsonwebtoken": "^8.5.1",
