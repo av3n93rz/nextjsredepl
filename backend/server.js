@@ -5,6 +5,11 @@ const connectDB = require('./db.js')
 const morgan = require('morgan')
 const UserRoutes = require('./routes/UserRoutes')
 const ProductRoutes = require('./routes/ProductRoutes')
+const BrandRoutes = require('./routes/BrandRoutes')
+const CategoryRoutes = require('./routes/CategoryRoutes')
+const UploadRoutes = require('./routes/UploadRoutes')
+const OrderRoutes = require('./routes/OrderRoutes')
+const BraintreeRoutes = require('./routes/BraintreeRoutes');
 const cookieParser = require('cookie-parser');
 const path = require('path')
 
@@ -13,8 +18,8 @@ const app = next({ dev })
 const handle = app.getRequestHandler()
 const PORT = process.env.PORT || 3000
 
-connectDB()
 dotenv.config()
+connectDB()
 
 app.prepare()
 .then(() => {
@@ -29,6 +34,12 @@ app.prepare()
 
   server.use('/api/v1/users', UserRoutes)
   server.use('/api/v1/products', ProductRoutes)
+  server.use('/api/v1/categories', CategoryRoutes)
+  server.use('/api/v1/brands', BrandRoutes)
+  server.use('/api/v1/upload', UploadRoutes)
+  server.use('/api/v1/orders', OrderRoutes)
+  server.use('/api/v1/braintree', BraintreeRoutes)
+
 
   const __dirname = path.resolve()
   server.use('/images', express.static(path.join(__dirname, '/images')))

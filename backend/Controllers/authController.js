@@ -66,3 +66,27 @@ exports.isLoggedIn = async (jwt_token) => {
       return {error: err.message}
     }
 }
+
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 1 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({ status: 'success' });
+};
+
+exports.signup = catchAsync(async (req, res) => {
+  const newUser = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  });
+  newUser.save((err, newUser) => {
+    if (err) {
+        return res.status(400).json({
+            error: 'Email is already registered!'
+      });
+    }
+    createSendToken(newUser, 201, req, res);
+});
+});
