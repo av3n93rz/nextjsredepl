@@ -13,6 +13,62 @@ exports.listProducts = () =>{
   })
 };
 
+exports.listAdminProducts = (cookie) =>{
+  return fetch(`${AppUrl}/api/v1/products/admin`, {
+    credentials: 'include',
+    method: 'GET',
+    headers:{
+      jwt:cookie
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
+exports.listUsers = (cookie) =>{
+  return fetch(`${AppUrl}/api/v1/users/admin`, {
+    credentials: 'include',
+    method: 'GET',
+    headers:{
+      jwt:cookie
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
+exports.getBrands = () =>{
+  return fetch(`${AppUrl}/api/v1/brands`, {
+    method: 'GET',
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
+exports.getCategories = () =>{
+  return fetch(`${AppUrl}/api/v1/categories`, {
+    method: 'GET',
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
 exports.getSingleProduct = (id) =>{
   return fetch(`${AppUrl}/api/v1/products/${id}`, {
     method: 'GET',
@@ -26,8 +82,24 @@ exports.getSingleProduct = (id) =>{
 };
 
 exports.signin = user =>{
-  console.log(user, 'aaaaaa')
   return fetch(`/api/v1/users/login`, {
+    method: 'POST',
+    headers:{
+      Accept: 'application/json',
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(user)
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+}
+
+exports.signupApi = user =>{
+  return fetch(`/api/v1/users/signup`, {
     method: 'POST',
     headers:{
       Accept: 'application/json',
