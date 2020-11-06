@@ -1,26 +1,25 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
-import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-import ShareIcon from '@material-ui/icons/Share';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import RatingComp from './Rating'
 import Link from '@material-ui/core/Link';
+import Image from 'next/image'
+import {AddToCart} from '../core/cartHandlers'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 250,
+    '& > div > div':{
+      display:'flex',
+      justifyContent: 'center'
+    }
   },
   media: {
     height: '200px',
@@ -40,8 +39,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: red[500],
   },
   cardTitle:{
+    display: 'block',
+    display: '-webkit-box',
     fontSize: '1rem',
-    paddingBottom: '5px'
+    paddingBottom: '5px',
+    maxWidth: '218px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical'
   },
   description:{
     display: 'block',
@@ -52,25 +58,34 @@ const useStyles = makeStyles((theme) => ({
     WebkitLineClamp: 4,
     WebkitBoxOrient: 'vertical'
   },
+  ImageContainer:{
+    maxHeight: '200px'
+  },
   ContentContainer:{
     padding: '16px 16px 0px 16px',
+    height: '147px'
   }
 }));
 
-const ProductCard = ({product}) => {
-
+const ProductCard = ({product, addToCartItems}) => {
   const classes = useStyles();
 
+  const AddToCartHandler = () =>{
+    AddToCart(product)
+    addToCartItems({
+      id:product._id,
+      name: product.name,
+      image:product.image[0],
+      price:product.price,
+      count: 1
+    })
+  }
 
   return (<Card className={classes.root}>
-    <CardMedia
-      className={classes.media}
-      image={`${product.image}`}
-      title="Paella dish"
-    />
+    <Image src={`${product.image[0]}`} alt={product.name} unsized={true} className={classes.ImageContainer}/>
     <CardContent className={classes.ContentContainer}>
       <Link href={`/product/id?product=${product._id}`}>
-        <Typography variant="h6" color="textSecondary" component="h3" className={classes.cardTitle}>
+        <Typography variant="h6" color="textSecondary" component="p" className={classes.cardTitle}>
           {product.name}
         </Typography>
       </Link>
@@ -87,7 +102,7 @@ const ProductCard = ({product}) => {
         <IconButton aria-label="Add to favorites">
           <FavoriteIcon />
         </IconButton>
-        <IconButton aria-label="Add to cart">
+        <IconButton aria-label="Add to cart" onClick={AddToCartHandler}>
           <AddShoppingCartIcon />
         </IconButton>
       </div>
