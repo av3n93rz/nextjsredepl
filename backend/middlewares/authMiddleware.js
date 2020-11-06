@@ -1,7 +1,7 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
-const User =  require('../models/userModel.js')
+const User =  require('../models/UserModel.js')
 
 exports.protect = asyncHandler(async (req, res, next) =>{
   let token = req.cookies.jwt || req.headers.jwt
