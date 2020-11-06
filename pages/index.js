@@ -1,10 +1,8 @@
 import Head from 'next/head'
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import Navbar from '../Components/Navbar'
-import ListProducts from '../Components/ListProducts';
+import ListProducts from '../Components/hocs/ListProducts';
 import { makeStyles } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Alert from '@material-ui/lab/Alert';
 import ProductCard from '../Components/ProductCard'
 import Grid from '@material-ui/core/Grid';
 import {Container} from '@material-ui/core';
@@ -19,19 +17,29 @@ const useStyles = makeStyles((theme) => ({
 }));
 
  const Home = ({products, userAuth, page, pages}) => {
+  const childNav = useRef(null);
   const classes = useStyles();
-  console.log(products, userAuth, page, pages)
+  const [displayedProducts, setDisplayedProducts] = useState(products)
+
+  const searchRequestHandler = (searchValue, category) => {
+    console.log(searchValue, category)
+  }
+
+  const addToCartItems = (product) => {
+    childNav.current.addToCartItems(product)
+  }  
 
   return (
     <>
     <Head>
         <title>Home Screen</title>
+        <meta name="description" content='Check out our newest products and the catalog.' />
       </Head>
-    <Navbar pageTitle={"Home"} User_name={userAuth && userAuth.name}/>
+    <Navbar pageTitle={"Home"} ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler}/>
       <Container maxWidth="lg">
         <h1>Latest Products</h1>
         <Grid container spacing={4} style={{justifyContent:"center"}}>
-          {products.map((product)=> (<Grid item><ProductCard key={product.id} product={product}/></Grid>))}
+          {displayedProducts.map((product)=> (<Grid item key={product._id}><ProductCard product={product} addToCartItems={addToCartItems}/></Grid>))}
         </Grid>
       </Container>
     </>

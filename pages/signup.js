@@ -19,9 +19,11 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import Link from '@material-ui/core/Link';
-import Router from 'next/router'
 import IsLoggedIn from '../Components/hocs/IsLoggedIn'
-import {signin} from '../core/apiCore'
+import {signupApi} from '../core/apiCore'
+import EmailIcon from '@material-ui/icons/Email';
+import Alert from '@material-ui/lab/Alert';
+import Router from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
   login_Card: {
@@ -62,14 +64,21 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const login = () => {
+const signup = () => {
   const classes = useStyles();
 
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState({
+    err: false,
+    msg:""
+  })
   const [pwValues, setPwValues] = useState({
     password: '',
     showPassword: false,
+    confirmPassword: '',
+    showConfirmPassword: false,
   });
 
   const handleMouseDownPassword = (event) => {
@@ -84,13 +93,41 @@ const login = () => {
     setPwValues({ ...pwValues, showPassword: !pwValues.showPassword });
   };
 
-  const loginHandler = async (e) =>{
+  const handleMouseDownConfirmPassword = (event) => {
+    event.preventDefault();
+  };
+
+  const handleConfirmPasswordChange = (event) => {
+    setPwValues({ ...pwValues, confirmPassword: event.target.value });
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setPwValues({ ...pwValues, showConfirmPassword: !pwValues.showConfirmPassword });
+  };
+
+  const validator = () =>{
+    return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    .test(email)
+  }
+
+  const signupHandler = async (e) =>{
     e.preventDefault()
-    const SignedInUser = await signin({email, pwValues})
-    if(SignedInUser.status === "success"){
-      setSuccess(true)
+    setError({err:false, msg:''})
+    if(validator()){
+      if(pwValues.password === pwValues.confirmPassword){
+        const isSignedUp = await signupApi({name, email, password:pwValues.password})
+        if(isSignedUp.error){
+          setError({err: true, msg:isSignedUp.error})
+        }
+        if(isSignedUp.status === 'success'){
+          setSuccess(true)
+        }
+      } else {
+        setError({err: true, msg:'Passwords do not match!'})
+      }
+    } else {
+      setError({err: true, msg:'Email format is not valid!'})
     }
-    
   }
 
   useEffect(()=>{
@@ -102,31 +139,40 @@ const login = () => {
   return (
     <>
     <Head>
-      <title>Webshop | Login</title>
-      <meta name="description" content="Login to your Avi\'s shop account!"/>
+      <title>Webshop | Sign Up</title>
+      <meta name="description" content="Create your Avi\'s shop account!"/>
     </Head>
     <Navbar />
     <Container>
       <Card className={classes.login_Card}>
         <CardContent className={classes.card_Content}>
             <Typography className={classes.h1_title} variant="h1" noWrap>
-              Sign In
+              Sign Up
             </Typography>
+            {error.err && <Alert variant="filled" severity="error">{error.msg}</Alert>}
             <Grid container spacing={1} alignItems="flex-end" className={classes.inputField} style={{marginBottom:'20px'}}>
               <Grid item>
                 <AccountCircle />
               </Grid>
               <Grid item>
-                <TextField id="input-with-icon-grid" label="Email address" value={email} onChange={(e)=> setEmail(e.target.value)} style={{width: '234px'}} />
+                <TextField required id="input-with-icon-grid" label="Name" value={name} onChange={(e)=> setName(e.target.value)} style={{width: '234px'}} />
+              </Grid>
+            </Grid>
+            <Grid container spacing={1} alignItems="flex-end" className={classes.inputField} style={{marginBottom:'20px'}}>
+              <Grid item>
+                <EmailIcon/>
+              </Grid>
+              <Grid item>
+                <TextField required id="input-with-icon-grid" label="Email address" value={email} onChange={(e)=> setEmail(e.target.value)} style={{width: '234px'}} />
               </Grid>
             </Grid>
             <Grid container spacing={1} alignItems="flex-end" className={classes.inputField} style={{marginBottom: '20px'}}>
               <Grid item>
                 <VpnKeyIcon />
               </Grid>
-              <FormControl className={classes.padding} style={{width: '242px'}}>
+              <FormControl required className={classes.padding} style={{width: '242px'}}>
                 <InputLabel htmlFor="standard-adornment-password" className={classes.padding}>Password</InputLabel>
-                <Input
+                <Input 
                   id="standard-adornment-password"
                   type={pwValues.showPassword ? 'text' : 'password'}
                   value={pwValues.password}
@@ -145,11 +191,36 @@ const login = () => {
                 />
               </FormControl>
             </Grid>
+            <Grid container spacing={1} alignItems="flex-end" className={classes.inputField} style={{marginBottom: '20px'}}>
+              <Grid item>
+                <VpnKeyIcon />
+              </Grid>
+              <FormControl required className={classes.padding} style={{width: '242px'}}>
+                <InputLabel htmlFor="standard-adornment-confirm-password" className={classes.padding}>Confirm Password</InputLabel>
+                <Input 
+                  id="standard-adornment-confirm-password"
+                  type={pwValues.showConfirmPassword ? 'text' : 'password'}
+                  value={pwValues.confirmPassword}
+                  onChange={(e) => handleConfirmPasswordChange(e)}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowConfirmPassword}
+                        onMouseDown={handleMouseDownConfirmPassword}
+                      >
+                        {pwValues.showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+            </Grid>
             <div className={classes.signInButton_Container}>
-              <Button variant="contained" color="primary" style={{marginLeft: 'auto'}} onClick={loginHandler}>Sign In</Button>
+              <Button variant="contained" color="primary" style={{marginLeft: 'auto'}} onClick={signupHandler}>Sign Up</Button>
             </div>
             <Typography variant="h6" noWrap className={classes.noAccountText}>
-              Don't have an account? <Link href='/signup'>Sign Up!</Link>
+              Already have an account? <Link href='/signin'>Sign In!</Link>
             </Typography>
         </CardContent>
       </Card>
@@ -158,4 +229,4 @@ const login = () => {
   )
 }
 
-export default IsLoggedIn(login)
+export default IsLoggedIn(signup)

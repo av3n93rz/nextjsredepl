@@ -34,7 +34,6 @@ export default function MyApp(props) {
 }
 
 MyApp.getInitialProps = async (AppContext) => {
-  console.log("2")
   const appProps = await App.getInitialProps(AppContext)
   const req = AppContext.ctx.req
   let userAuth
