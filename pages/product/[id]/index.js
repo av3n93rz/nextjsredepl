@@ -3,7 +3,7 @@ import ProductCard from '../../../Components/ProductCard'
 import Navbar from '../../../Components/Navbar'
 import GetProduct from '../../../Components/hocs/GetProduct'
 import Image from 'next/image'
-import BottomNavbar from '../Components/BottomNavbar'
+import BottomNavbar from '../../../Components/BottomNavbar'
 
 
 const Product = (props) => {
