@@ -6,6 +6,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import ProductCard from '../Components/ProductCard'
 import Grid from '@material-ui/core/Grid';
 import {Container} from '@material-ui/core';
+import BottomNavbar from '../Components/BottomNavbar'
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
  const Home = ({products, userAuth, page, pages}) => {
   const childNav = useRef(null);
+  const BottomCart = useRef(null);
   const classes = useStyles();
   const [displayedProducts, setDisplayedProducts] = useState(products)
 
@@ -27,7 +30,20 @@ const useStyles = makeStyles((theme) => ({
 
   const addToCartItems = (product) => {
     childNav.current.addToCartItems(product)
+    console.log(BottomCart)
   }  
+
+  const passToBottom = (cartItems) =>{
+    BottomCart.current.passDownItems(cartItems)
+  }
+
+  const removeFromCartHandler = (id) =>{
+    childNav.current.removeItemHandler(id)
+  }
+
+  const clearNavCartState = () =>{
+    childNav.current.clearCart()
+  }
 
   return (
     <>
@@ -35,13 +51,14 @@ const useStyles = makeStyles((theme) => ({
         <title>Home Screen</title>
         <meta name="description" content='Check out our newest products and the catalog.' />
       </Head>
-    <Navbar pageTitle={"Home"} ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler}/>
+    <Navbar ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler} passToBottom={passToBottom}/>
       <Container maxWidth="lg">
         <h1>Latest Products</h1>
         <Grid container spacing={4} style={{justifyContent:"center"}}>
           {displayedProducts.map((product)=> (<Grid item key={product._id}><ProductCard product={product} addToCartItems={addToCartItems}/></Grid>))}
         </Grid>
       </Container>
+      <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState} User_name={userAuth && userAuth.name}/>
     </>
   )
 }
