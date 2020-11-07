@@ -1,4 +1,4 @@
-import React, {useState, useEffect, forwardRef, useImperativeHandle}from 'react';
+import React, { useLayoutEffect, useState, useEffect, forwardRef, useImperativeHandle, useCallback}from 'react';
 import {makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '300px',
     borderBottomLeftRadius: '0px',
     borderBottomRightRadius: '0px',
-    overflowX: 'hidden'
+    overflowX: 'hidden',
   },
   cartItemTitle:{
     display: 'block',
@@ -84,13 +84,20 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom:'15px'
   },
   checkoutText:{
-    fontSize: '0.8rem'
+    fontSize: '0.8rem',
+    fontWeight: '600'
+
   },
   clrCart:{
     paddingBottom: '5px',
     textAlign: 'center',
     fontSize: '0.8rem',
     cursor: 'pointer'
+  },
+  Paper:{
+    [theme.breakpoints.down('smd')]: {
+      display: 'none',
+    },
   }
 }));
 
@@ -101,13 +108,26 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
   const [placement, setPlacement] = useState();
   const [items, setItems] = useState(cartItems)
 
+  const updateSize = useCallback(() => {
+    if(window.innerWidth <= 750){
+      handleClickAway()
+    }
+  },[])
+
+ const handleToggle = () => {
+    if (!open) window.addEventListener('resize', updateSize)
+    else window.removeEventListener('resize', updateSize)
+  }
+
   const handleClick = (newPlacement) => (event) => {
+    handleToggle()
     setAnchorEl(event.currentTarget);
     setOpen((prev) => placement !== newPlacement || !prev);
     setPlacement(newPlacement);
   };
 
   const handleClickAway = () => {
+    handleToggle()
     setAnchorEl(null)
     setOpen(false)
     setPlacement()
@@ -136,12 +156,12 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
     <>
       <ClickAwayListener onClickAway={handleClickAway}>
         <div>
-          <Button onClick={handleClick('bottom-end')}><ShoppingCartIcon/><Typography variant="subtitle1" component="p">Cart</Typography></Button>
+          <Button onClick={handleClick('bottom-end')}><ShoppingCartIcon className={classes.secondaryColor} /><Typography variant="subtitle1" component="p" className={classes.secondaryColor}>Cart</Typography></Button>
           {items.length > 0 ? (
             <Popper open={open} anchorEl={anchorEl} placement={placement} transition>
             {({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={200}>
-                <Paper>
+                <Paper className={classes.Paper}>
                   <div className={classes.cartPaper}>
                     {items.map((item)=>(
                       <>
@@ -182,7 +202,7 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
                     </div>
                     <div className={classes.checkout}>
                       <Link href={`/checkout`} underline={'none'}>
-                        <Button variant="contained" color="primary"><DoneIcon/><Typography variant="h6" component="p" className={classes.checkoutText} >Proceed to Checkout</Typography></Button>
+                        <Button variant="contained" color='primary'><DoneIcon color='secondary'/><Typography variant="h6" component="p" color='secondary' className={classes.checkoutText} >Proceed to Checkout</Typography></Button>
                       </Link>
                     </div>
                     <Typography onClick={clearCartHandler} variant="caption text" color="textSecondary" component="p" className={classes.clrCart}>
@@ -197,7 +217,7 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
             <Popper open={open} anchorEl={anchorEl} placement={placement} transition>
             {({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={200}>
-                <Paper>
+                <Paper className={classes.Paper}>
                   <Typography variant="button" color="textSecondary" component="p"className={classes.typography} >
                     Your cart is empty
                   </Typography>

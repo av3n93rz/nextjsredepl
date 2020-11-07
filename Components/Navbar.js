@@ -10,13 +10,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { withRouter } from 'next/router'
 import AdminDrawer from './Drawer'
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import Popper from '@material-ui/core/Popper';
-import Fade from '@material-ui/core/Fade';
-import Paper from '@material-ui/core/Paper';
-import Image from 'next/image'
-import Divider from '@material-ui/core/Divider';
 import NavbarCart from '../Components/NavbarCart'
+import Image from 'next/image'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -31,9 +26,6 @@ const useStyles = makeStyles((theme) => ({
   },
   NavTitle: {
     color: '#fff',
-    [theme.breakpoints.up('sm')]: {
-      display: 'block',
-    },
   },
   search: {
     position: 'relative',
@@ -41,12 +33,8 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
     marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
-      width: 'auto',
-    },
+    marginLeft: theme.spacing(3),
+    width: 'auto',
   },
   searchIcon: {
     padding: theme.spacing(0, 2),
@@ -78,12 +66,8 @@ const useStyles = makeStyles((theme) => ({
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 1),
-    // vertical padding + font size from searchIcon
     transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
+    width: '20ch',
   },
   selectCategory:{
     display: 'block',
@@ -99,7 +83,10 @@ const useStyles = makeStyles((theme) => ({
     opacity: '0',
     visibility: 'visible',
     border: '0',
-    lineHeight: '35px'
+    lineHeight: '35px',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
   },
   searchCategory:{
     display: 'flex',
@@ -110,16 +97,19 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: alpha(theme.palette.common.white, 0.25),
     borderTopLeftRadius: theme.shape.borderRadius,
     borderBottomLeftRadius: theme.shape.borderRadius,
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
   },
   sectionDesktop: {
     display: 'none',
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('smd')]: {
       display: 'flex',
     },
   },
   sectionMobile: {
     display: 'flex',
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('smd')]: {
       display: 'none',
     },
   },
@@ -177,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Navbar = withRouter(({router, pageTitle="Avi's Shop", User_name, trigger, inputRef, setCheckout}) => {
+const Navbar = withRouter(({router, User_name, trigger, inputRef, setCheckout, passToBottom}) => {
   const NavCartRef = useRef(null);
   const classes = useStyles();
   const [searchValue, setSearchValue] = useState("");
@@ -198,6 +188,7 @@ const Navbar = withRouter(({router, pageTitle="Avi's Shop", User_name, trigger, 
 
   useEffect(()=>{
     NavCartRef.current.passDownItems(cartItems)
+    passToBottom(cartItems)
   }, [cartItems])
 
   const searchHandler = () =>{
@@ -215,7 +206,10 @@ const Navbar = withRouter(({router, pageTitle="Avi's Shop", User_name, trigger, 
     },
     removeItemHandler(item){
       removeFromCartHandler(item)
-    }
+    },
+    clearCart(){
+      setCartItems([])
+    },
   }))
 
   const removeFromCartHandler = (item) => {
@@ -231,9 +225,13 @@ const Navbar = withRouter(({router, pageTitle="Avi's Shop", User_name, trigger, 
       <AppBar position="static" color="secondary" style={{zIndex:'-1'}}>
         <Toolbar>
           <Link href="/" style={{textDecoration: 'none'}}>
-            <Typography className={classes.NavTitle} variant="h6" noWrap>
-              {pageTitle}
-            </Typography>
+            <Image
+              src="/images/e-logo.png"
+              alt="E-commerce logo"
+              width={38}
+              height={39}
+              quality={100}
+            />
           </Link>
           <div className={classes.search}>
             <div className={classes.searchCategory}>
