@@ -30,6 +30,8 @@ import getCookie from '../Components/hocs/getCookie'
 import {getBraintreeClientToken, processPayment} from '../core/braintreeCore'
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import {emptyCart} from '../core/cartHandlers'
+import BottomNavbar from '../Components/BottomNavbar'
+
 
 const ColorlibConnector = withStyles({
   alternativeLabel: {
@@ -271,6 +273,7 @@ const useStyles = makeStyles((theme) => ({
 
  const checkout = ({userAuth, cookie}) => {
   const childNav = useRef(null);
+  const BottomCart = useRef(null);
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
   const [orderItems, setOrderItems] = useState([]);
@@ -555,6 +558,22 @@ const useStyles = makeStyles((theme) => ({
   useEffect(()=>{
     getToken()
   }, [])
+  
+  const searchRequestHandler = (searchValue, category) => {
+    console.log(searchValue, category)
+  }
+
+  const passToBottom = (cartItems) =>{
+    BottomCart.current.passDownItems(cartItems)
+  }
+
+  const removeFromCartHandler = (id) =>{
+    childNav.current.removeItemHandler(id)
+  }
+
+  const clearNavCartState = () =>{
+    childNav.current.clearCart()
+  }
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -562,10 +581,6 @@ const useStyles = makeStyles((theme) => ({
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
   };
 
   const RemoveFromCart = (id) =>{
@@ -915,8 +930,8 @@ const useStyles = makeStyles((theme) => ({
         <meta name="description" content='Place an order' />
         <link href="/globals.css" rel="stylesheet"/>
       </Head>
-    <Navbar ref={childNav} User_name={userAuth && userAuth.name} setCheckout={setOrderItems}/>
-    <Container maxWidth="sm" className={classes.mainContainer}>
+      <Navbar ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler} passToBottom={passToBottom} setCheckout={setOrderItems}/>
+      <Container maxWidth="sm" className={classes.mainContainer}>
       {orderItems.length > 0 ? (
       <div className={classes.root}>
         <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
@@ -943,6 +958,7 @@ const useStyles = makeStyles((theme) => ({
       }
       
     </Container>
+    <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState} User_name={userAuth && userAuth.name}/>
   </>
   )
 }

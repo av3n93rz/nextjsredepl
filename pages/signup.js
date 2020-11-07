@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import Head from 'next/head'
 import { makeStyles } from '@material-ui/core/styles';
 import Navbar from '../Components/Navbar'
@@ -23,6 +23,7 @@ import IsLoggedIn from '../Components/hocs/IsLoggedIn'
 import {signupApi} from '../core/apiCore'
 import EmailIcon from '@material-ui/icons/Email';
 import Alert from '@material-ui/lab/Alert';
+import BottomNavbar from '../Components/BottomNavbar'
 import Router from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
@@ -66,7 +67,8 @@ const useStyles = makeStyles((theme) => ({
 
 const signup = () => {
   const classes = useStyles();
-
+  const childNav = useRef(null);
+  const BottomCart = useRef(null);
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [success, setSuccess] = useState(false)
@@ -80,6 +82,26 @@ const signup = () => {
     confirmPassword: '',
     showConfirmPassword: false,
   });
+
+  const searchRequestHandler = (searchValue, category) => {
+    console.log(searchValue, category)
+  }
+
+  const addToCartItems = (product) => {
+    childNav.current.addToCartItems(product)
+  }  
+
+  const passToBottom = (cartItems) =>{
+    BottomCart.current.passDownItems(cartItems)
+  }
+
+  const removeFromCartHandler = (id) =>{
+    childNav.current.removeItemHandler(id)
+  }
+
+  const clearNavCartState = () =>{
+    childNav.current.clearCart()
+  }
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -142,7 +164,7 @@ const signup = () => {
       <title>Webshop | Sign Up</title>
       <meta name="description" content="Create your Avi\'s shop account!"/>
     </Head>
-    <Navbar />
+    <Navbar ref={childNav} trigger={searchRequestHandler} passToBottom={passToBottom}/>
     <Container>
       <Card className={classes.login_Card}>
         <CardContent className={classes.card_Content}>
@@ -225,6 +247,7 @@ const signup = () => {
         </CardContent>
       </Card>
     </Container>
+    <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
     </>
   )
 }

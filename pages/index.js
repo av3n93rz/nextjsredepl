@@ -30,7 +30,6 @@ const useStyles = makeStyles((theme) => ({
 
   const addToCartItems = (product) => {
     childNav.current.addToCartItems(product)
-    console.log(BottomCart)
   }  
 
   const passToBottom = (cartItems) =>{
@@ -58,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
           {displayedProducts.map((product)=> (<Grid item key={product._id}><ProductCard product={product} addToCartItems={addToCartItems}/></Grid>))}
         </Grid>
       </Container>
-      <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState} User_name={userAuth && userAuth.name}/>
+      <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
     </>
   )
 }
