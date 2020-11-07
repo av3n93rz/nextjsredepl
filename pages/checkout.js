@@ -137,6 +137,7 @@ const useStyles = makeStyles((theme) => ({
   },
   mainContainer:{
     marginTop:'30px',
+    marginBottom: '75px',
     display: 'flex',
     flexDirection: 'column',
   },
