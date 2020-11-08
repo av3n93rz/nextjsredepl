@@ -80,8 +80,6 @@ const useStyles = makeStyles((theme) => ({
 const ProductCard = ({product, addToCartItems}) => {
   const classes = useStyles();
 
-  console.log(product)
-
   const AddToCartHandler = () =>{
     AddToCart(product)
     addToCartItems({
