@@ -108,6 +108,8 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
   const [placement, setPlacement] = useState();
   const [items, setItems] = useState(cartItems)
 
+  console.log(items)
+
   const updateSize = useCallback(() => {
     if(window.innerWidth <= 750){
       handleClickAway()
@@ -167,7 +169,7 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
                       <>
                         <div key={item.id} className={classes.cartItemContainer}>
                           <div className={classes.cartItemImageContainer}>
-                            <Image src={`${item.image}`} alt={item.name} unsized={true} className={classes.cartItemImage}/>
+                            <Image src={`${item.image}`} priority={true} alt={item.name} unsized={true} className={classes.cartItemImage}/>
                           </div>
                           <div className={classes.cartItemDetails}>
                             <Link href={`/product/id?product=${item.id}`} underline={'none'}>

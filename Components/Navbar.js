@@ -174,6 +174,7 @@ const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passTo
   const [category, setCategory] = useState("All");
   const [cartItems, setCartItems] = useState([]);
 
+
   if(setCheckout){
     setCheckout(cartItems)
   }

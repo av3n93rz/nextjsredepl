@@ -1,4 +1,4 @@
-import React, {useState, forwardRef, useImperativeHandle}from 'react';
+import React, {useState, forwardRef, useImperativeHandle, useEffect}from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Fab from '@material-ui/core/Fab';
@@ -166,6 +166,10 @@ const BottomNavar = forwardRef(({removeFromCartHandler, clearNavCartState}, Bott
     clearNavCartState([])
   }
 
+useEffect(()=>{
+  console.log(items)
+},[items])  
+
   return (
     <ClickAwayListener onClickAway={openCartClickAway}>
       <div className={classes.BottomBar}>
@@ -197,7 +201,7 @@ const BottomNavar = forwardRef(({removeFromCartHandler, clearNavCartState}, Bott
                 <>
                   <div key={item.id} className={classes.cartItemContainer}>
                     <div className={classes.cartItemImageContainer}>
-                      <Image src={`${item.image}`} alt={item.name} unsized={true} className={classes.cartItemImage}/>
+                      <Image src={`${item.image}`} priority={true} alt={item.name} unsized={true} className={classes.cartItemImage}/>
                     </div>
                     <div className={classes.cartItemDetails}>
                       <Link href={`/product/id?product=${item.id}`} underline={'none'}>

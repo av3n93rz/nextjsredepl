@@ -81,15 +81,17 @@ const ProductCard = ({product, addToCartItems}) => {
   const classes = useStyles();
 
   const AddToCartHandler = () =>{
-    AddToCart(product)
-    addToCartItems({
+    const prod = {
       id:product._id,
       name: product.name,
       image:product.image[0].url,
       price:product.price,
       count: 1
-    })
+    }
+    AddToCart(prod)
+    addToCartItems(prod)
   }
+
 
   return (<Card className={classes.root}>
     <div className={classes.imgContainer}>
