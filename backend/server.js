@@ -42,7 +42,7 @@ app.prepare()
 
 
   const __dirname = path.resolve()
-  server.use('/images', express.static(path.join(__dirname, '/images')))
+  server.use(express.static(path.join(__dirname, 'public')))
 
   server.get('*', (req, res) => {
     return handle(req, res)

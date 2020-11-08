@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler')
 
 
 exports.getAllProducts = asyncHandler (async (req, res) => {
-  const pageSize = 18
+  const pageSize = 46
   const page = Number(req.query.pageNumber) || 1
 
   const keyword = req.query.keyword ? {
@@ -34,6 +34,45 @@ exports.getSingleProduct = asyncHandler (async (req, res) => {
   }
 })
 
+exports.createProduct = asyncHandler (async (req, res) => {
+    const sample = ['/images/sample.jpg']
+  const product = new Product({
+    name: req.body.name,
+    price: req.body.price,
+    user: req.user._id,
+    image: req.body.images ? req.body.images:sample,
+    brand: req.body.brand === 'Add New Brand' ? req.body.newBrandId:req.body.brand,
+    category: req.body.category === 'Add New Category' ? req.body.newCategoryId:req.body.category,
+    countInStock: req.body.countInStock,
+    numReviews: 0,
+    description: req.body.description
+  })
+
+  const createdProduct = await product.save()
+
+  res.status(201).json(createdProduct)
+})
+
+exports.updateProduct = asyncHandler (async (req, res) => {
+  const sample = ['/images/sample.jpg']
+  const product = await Product.findById(req.params.id)
+  if(product){
+    product.name = req.body.name,
+    product.price = req.body.price,
+    product.image = req.body.images ? [...req.body.image, ...req.body.images]:req.body.image,
+    product.brand = req.body.brand === 'Add New Brand' ? req.body.newBrandId:req.body.brand,
+    product.category = req.body.category === 'Add New Category' ? req.body.newCategoryId:req.body.category,
+    product.countInStock = req.body.countInStock,
+    product.description = req.body.description
+
+    const updatedProduct = await product.save()
+    res.status(201).json(updatedProduct)
+  } else {
+    res.status(404)
+    throw new Error('Product not found')
+  }
+  
+})
 exports.createProduct = asyncHandler (async (req, res) => {
     const sample = ['/images/sample.jpg']
   const product = new Product({

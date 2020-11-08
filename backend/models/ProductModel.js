@@ -41,11 +41,13 @@ const productSchema = new mongoose.Schema({
   brand: {
     type: ObjectId,
     ref: Brand,
+    trim: true,
     required: true
   },
   category:{
     type: ObjectId,
     ref: Category,
+    trim: true,
     required: true
   },
   description: {
