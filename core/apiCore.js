@@ -91,7 +91,8 @@ exports.signin = user =>{
     body: JSON.stringify(user)
   })
   .then(response =>{
-    return response.json()
+    console.log(response)
+    return response
   })
   .catch(err=>{
     console.log(err)

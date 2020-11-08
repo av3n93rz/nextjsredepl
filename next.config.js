@@ -1,5 +1,5 @@
 module.exports = {
   images: {
-    domains: ['assets.vercel.com'],
+    domains: ['ik.imagekit.io'],
   },
 }

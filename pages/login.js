@@ -22,13 +22,14 @@ import Link from '@material-ui/core/Link';
 import Router from 'next/router'
 import IsLoggedIn from '../Components/hocs/IsLoggedIn'
 import {signin} from '../core/apiCore'
-import BottomNavbar from '../Components/BottomNavbar'
+import Alert from '@material-ui/lab/Alert';
+import Image from 'next/image'
 
 const useStyles = makeStyles((theme) => ({
   login_Card: {
     maxWidth: '460px',
     margin: '0 auto',
-    marginTop: '150px' 
+    marginTop: '50px',
   },
   inputField: {
     display: 'flex',
@@ -60,13 +61,37 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
     margin:'0 auto',
     textAlign: 'center',
+  },
+  AuthSvg:{
+    position: 'absolute',
+    zIndex: '-1',
+    top: '300px',
+    left: '45%',
+    [theme.breakpoints.down('smd')]: {
+      top: '460px',
+      left: '30%',
+      width: '450px'
+    },
+    [theme.breakpoints.down('xs')]: {
+      top: '460px',
+      left: '20%',
+      width: '450px'
+    },
+  },
+  eComLogo:{
+    display: 'flex',
+    justifyContent: 'center',
+    margin: '30px 0 5px 0'
   }
 }));
 
 const login = () => {
   const classes = useStyles();
   const childNav = useRef(null);
-  const BottomCart = useRef(null);
+  const [error, setError] = useState({
+    err: false,
+    msg: ''
+  })
   const [email, setEmail] = useState('')
   const [success, setSuccess] = useState(false)
   const [pwValues, setPwValues] = useState({
@@ -90,30 +115,18 @@ const login = () => {
     console.log(searchValue, category)
   }
 
-  const addToCartItems = (product) => {
-    childNav.current.addToCartItems(product)
-  }  
-
-  const passToBottom = (cartItems) =>{
-    BottomCart.current.passDownItems(cartItems)
+  const passToBottom = () =>{
+    return
   }
-
-  const removeFromCartHandler = (id) =>{
-    childNav.current.removeItemHandler(id)
-  }
-
-  const clearNavCartState = () =>{
-    childNav.current.clearCart()
-  }
-
 
   const loginHandler = async (e) =>{
     e.preventDefault()
     const SignedInUser = await signin({email, pwValues})
-    if(SignedInUser.status === "success"){
+    if(SignedInUser.status === 200){
       setSuccess(true)
+    } else if(SignedInUser.status === 401){
+      setError({err: true, msg:'Incorrect email or password!'})
     }
-    
   }
 
   useEffect(()=>{
@@ -127,14 +140,22 @@ const login = () => {
     <Head>
       <title>Webshop | Login</title>
       <meta name="description" content="Login to your Avi\'s shop account!"/>
+      <link href="/globals.css" rel="stylesheet"/>
     </Head>
-    <Navbar ref={childNav} trigger={searchRequestHandler} passToBottom={passToBottom}/>
+    <Navbar ref={childNav} trigger={searchRequestHandler} passToBottom={passToBottom} displayCart={false}/>
     <Container>
+      <div className={classes.AuthSvg}>
+        <Image src={'/svg/undraw_Login_re_4vu2.svg'} alt={'auth_svg'} width={'580px'} height={'400px'}/>
+      </div>
       <Card className={classes.login_Card}>
+        <div className={classes.eComLogo}>
+          <Image src={'/images/e-text-logo.png'} alt={'ecommerce-logo'} width={'143px'} height={'87px'} quality={100}/>
+        </div>
         <CardContent className={classes.card_Content}>
             <Typography className={classes.h1_title} variant="h1" noWrap>
               Sign In
             </Typography>
+            {error.err && <Alert variant="filled" severity="error">{error.msg}</Alert>}
             <Grid container spacing={1} alignItems="flex-end" className={classes.inputField} style={{marginBottom:'20px'}}>
               <Grid item>
                 <AccountCircle />
@@ -177,7 +198,6 @@ const login = () => {
         </CardContent>
       </Card>
     </Container>
-    <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
     </>
   )
 }

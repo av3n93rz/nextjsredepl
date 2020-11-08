@@ -931,7 +931,7 @@ const useStyles = makeStyles((theme) => ({
         <meta name="description" content='Place an order' />
         <link href="/globals.css" rel="stylesheet"/>
       </Head>
-      <Navbar ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler} passToBottom={passToBottom} setCheckout={setOrderItems}/>
+      <Navbar ref={childNav} user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom} setCheckout={setOrderItems}/>
       <Container maxWidth="sm" className={classes.mainContainer}>
       {orderItems.length > 0 ? (
       <div className={classes.root}>

@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import Head from 'next/head'
 import { makeStyles} from '@material-ui/core/styles';
-import ListUsers from '../../Components/hocs/ListUsers'
-import PrivateRoute from '../../Components/hocs/PrivateRoute';
+import ListAdminProducts from '../../../Components/hocs/ListAdminProducts'
+import PrivateRoute from '../../../Components/hocs/PrivateRoute';
 import {Container} from '@material-ui/core';
-import Navbar from '../../Components/Navbar'
+import Navbar from '../../../Components/Navbar'
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
-import EnhancedTable from '../../Components/AdminUserListTable'
+import EnhancedTable from '../../../Components/AdminProductListTable'
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -31,14 +31,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const UserList = ({users, userAuth}) => {
+const ProductList = ({products, userAuth}) => {
   const classes = useStyles();
   const [searchQuery, setSearchQuery] = useState("");
-  const [prodsState, setProdsState] = useState(users);
+  const [prodsState, setProdsState] = useState(products);
   const [searchCol, setSearchCol] = useState('name');
   const [notanum, setNotanum] = useState(false);
 
-  
+  useEffect(()=>{
+    if((searchCol === 'rating' || searchCol === 'countInStock' || searchCol === 'price') && (isNaN(searchQuery))){
+      setNotanum(true)
+    } else {
+      setNotanum(false)
+    }
+  }, [searchQuery, searchCol])
+
   const passToBottom = () =>{
     return
   }
@@ -50,8 +57,8 @@ const UserList = ({users, userAuth}) => {
   return (
     <>
     <Head>
-        <title>Admin | List Users</title>
-      <meta name="description" content='A list of the Users in the system. You can edit and delete them here.' />
+        <title>Admin | List Products</title>
+      <meta name="description" content='A list of the products in the system. You can edit and delete them here.' />
     </Head>
     <Navbar user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
     <Container maxWidth="md" className={classes.container}>
@@ -66,17 +73,26 @@ const UserList = ({users, userAuth}) => {
             value={searchCol}
             onChange={(e)=> setSearchCol(e.target.value)}>
             <MenuItem key={'name'} value={'name'}>Name</MenuItem>
-            <MenuItem key={'_id'} value={'_id'}>Id</MenuItem>
-            <MenuItem key={'email'} value={'email'}>Email</MenuItem>
+            <MenuItem key={'category'} value={'category'}>Category</MenuItem>
+            <MenuItem key={'brand'} value={'brand'}>Brand</MenuItem>
+            <MenuItem key={'rating'} value={'rating'}>Rating</MenuItem>
+            <MenuItem key={'countInStock'} value={'countInStock'}>Count In Stock</MenuItem>
+            <MenuItem key={'price'} value={'price'}>Price</MenuItem>
           </Select>
         </FormControl>
       </div>
-      <EnhancedTable users={searchQuery ? searchCol === 'name' ?
+      <EnhancedTable products={searchQuery ? searchCol === 'name' ?
         prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
         :
-        searchCol === 'email' ?  prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
+        searchCol === 'brand' ? prodsState.filter(el=> el[searchCol].name.toLowerCase().includes(searchQuery.toLowerCase()))
         :
-        searchCol === '_id' ? prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
+        searchCol === 'category' ? prodsState.filter(el=> el[searchCol].name.toLowerCase().includes(searchQuery.toLowerCase()))
+        :
+        searchCol === 'rating' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
+        :
+        searchCol === 'countInStock' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
+        :
+        searchCol === 'price' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
         :
         prodsState
         :
@@ -87,9 +103,9 @@ const UserList = ({users, userAuth}) => {
   );
 }
 
-UserList.getInitialProps = async (users) => {
-  return users
+ProductList.getInitialProps = async (products) => {
+  return products
 }
 
-export default PrivateRoute(ListUsers(UserList))
+export default PrivateRoute(ListAdminProducts(ProductList))
 

@@ -6,8 +6,7 @@ import Image from 'next/image'
 import BottomNavbar from '../../../Components/BottomNavbar'
 
 
-const Product = (props) => {
-  const {product, userAuth} = props
+const Product = ({product, userAuth}) => {
   const childNav = useRef(null);
   const BottomCart = useRef(null);
 
@@ -33,7 +32,7 @@ const Product = (props) => {
 
   return (
     <>
-      <Navbar ref={childNav} User_name={userAuth && userAuth.name} trigger={searchRequestHandler} passToBottom={passToBottom}/>
+      <Navbar ref={childNav} user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
       <h1>ProductPage</h1>
       <ProductCard product={product}/>
       <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
@@ -41,7 +40,7 @@ const Product = (props) => {
   )
 }
 
-Product.getInitialProps = async (product) => {
+Product.getInitialProps = async ({product}) => {
   return {product}
 }
 
