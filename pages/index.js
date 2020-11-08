@@ -126,13 +126,13 @@ const useStyles = makeStyles((theme) => ({
         <div className={classes.slide1}>
           <Typography variant="h6" component="p" className={classes.slideTitle}>{products[14].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[14].image[0].url}`} alt={products[14].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[14].image[0].url}`} priority={true} alt={products[14].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
         <div className={classes.slide2}>
         <Typography variant="h6" component="p" className={classes.slideTitle}>{products[24].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[24].image[0].url}`} alt={products[24].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[24].image[0].url}`} priority={true} alt={products[24].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
       </Slider>
