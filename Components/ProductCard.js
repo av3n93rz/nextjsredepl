@@ -17,7 +17,6 @@ const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 250,
     '& > div > div':{
-      display:'flex',
       justifyContent: 'center'
     }
   },
@@ -59,16 +58,29 @@ const useStyles = makeStyles((theme) => ({
     WebkitBoxOrient: 'vertical'
   },
   ImageContainer:{
-    maxHeight: '200px'
+    maxHeight: '200px',
+    maxWidth: '-webkit-fill-available',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    display: 'flex',
+    padding: '10px'
   },
   ContentContainer:{
     padding: '16px 16px 0px 16px',
     height: '147px'
+  },
+  imgContainer:{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    height: '200px',
   }
 }));
 
 const ProductCard = ({product, addToCartItems}) => {
   const classes = useStyles();
+
+  console.log(product)
 
   const AddToCartHandler = () =>{
     AddToCart(product)
@@ -82,7 +94,9 @@ const ProductCard = ({product, addToCartItems}) => {
   }
 
   return (<Card className={classes.root}>
-    <Image src={`${product.image[0]}`} alt={product.name} unsized={true} className={classes.ImageContainer}/>
+    <div className={classes.imgContainer}>
+      <Image src={`${product.image[0].url}`} alt={product.name} unsized={true} className={classes.ImageContainer}/>
+    </div>
     <CardContent className={classes.ContentContainer}>
       <Link href={`/product/id?product=${product._id}`}>
         <Typography variant="h6" color="textSecondary" component="p" className={classes.cardTitle}>

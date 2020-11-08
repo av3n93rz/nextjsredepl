@@ -318,7 +318,7 @@ const EnhancedTable = ({products, setDeleteState}) => {
                         />
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">
-                        <Link href={`/product/id?product=${row.id}`}>
+                        <Link href={`/admin/products/id?product=${row.id}`}>
                           {row.name}
                         </Link>
                       </TableCell>

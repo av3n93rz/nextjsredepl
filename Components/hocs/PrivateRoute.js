@@ -12,6 +12,12 @@ const checkUserAuthentication = async (jwt_token) => {
 export default WrappedComponent => {
   const hocComponent = ({ ...props }) => <WrappedComponent {...props} />;
   hocComponent.getInitialProps = async ({ req, res}) => {
+    let productId
+    if(req.query){
+      if(req.query.product){
+        productId=req.query.product
+      }
+    }
     let user
     let userAuth
     let cookie
@@ -41,7 +47,7 @@ export default WrappedComponent => {
         Router.replace(login);
       }
     } else if (WrappedComponent.getInitialProps) {
-      const wrappedProps = await WrappedComponent.getInitialProps({cookie});
+      const wrappedProps = await WrappedComponent.getInitialProps({cookie, productId});
       return { ...wrappedProps};
     }
 

@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Navbar = withRouter(({router, User_name, trigger, inputRef, setCheckout, passToBottom}) => {
+const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passToBottom, displayCart = true}) => {
   const NavCartRef = useRef(null);
   const classes = useStyles();
   const [searchValue, setSearchValue] = useState("");
@@ -187,7 +187,9 @@ const Navbar = withRouter(({router, User_name, trigger, inputRef, setCheckout, p
   },[])
 
   useEffect(()=>{
-    NavCartRef.current.passDownItems(cartItems)
+    if(displayCart){
+      NavCartRef.current.passDownItems(cartItems)
+    }
     passToBottom(cartItems)
   }, [cartItems])
 
@@ -231,6 +233,7 @@ const Navbar = withRouter(({router, User_name, trigger, inputRef, setCheckout, p
               width={38}
               height={39}
               quality={100}
+              priority={true}
             />
           </Link>
           <div className={classes.search}>
@@ -261,15 +264,20 @@ const Navbar = withRouter(({router, User_name, trigger, inputRef, setCheckout, p
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-           <NavbarCart cartItems={cartItems} removeFromCartHandler={removeFromCartHandler} clearNavCartState={setCartItems} ref={NavCartRef}/>
-            {User_name ? (<AdminDrawer user={User_name}/>):router.pathname === "/login" ? "":(
-              <Link href="/login" >
+           {displayCart && <NavbarCart cartItems={cartItems} removeFromCartHandler={removeFromCartHandler} clearNavCartState={setCartItems} ref={NavCartRef}/>}
+            {user ? 'isAdmin' in user ? (<AdminDrawer user={user}/>):router.pathname === "/login" ? "":(
+              <Link href="/login" underline={'none'}>
+                <Button variant="contained" color="primary" className={classes.buttons}>{"Login"}</Button>
+              </Link>
+              ):(
+              <Link href="/login" underline={'none'}>
                 <Button variant="contained" color="primary" className={classes.buttons}>{"Login"}</Button>
               </Link>
               )}
           </div>
           <div className={classes.sectionMobile}>
-            <AdminDrawer user={User_name} isMobile={true}/>
+
+            <AdminDrawer user={user} isMobile={true}/>
           </div>
         </Toolbar>
       </AppBar>
