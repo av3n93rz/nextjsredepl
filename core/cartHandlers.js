@@ -3,7 +3,7 @@ const AddToCart = (product) => {
   const newItem = {
     name: product.name,
     id:product._id,
-    image:product.image[0],
+    image:product.image[0].url,
     price:product.price,
     count: 1
   }
