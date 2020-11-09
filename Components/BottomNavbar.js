@@ -166,10 +166,6 @@ const BottomNavar = forwardRef(({removeFromCartHandler, clearNavCartState}, Bott
     clearNavCartState([])
   }
 
-useEffect(()=>{
-  console.log(items)
-},[items])  
-
   return (
     <ClickAwayListener onClickAway={openCartClickAway}>
       <div className={classes.BottomBar}>

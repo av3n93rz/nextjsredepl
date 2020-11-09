@@ -64,6 +64,8 @@ exports.updateProduct = asyncHandler (async (req, res) => {
     product.category = req.body.category === 'Add New Category' ? req.body.newCategoryId:req.body.category,
     product.countInStock = req.body.countInStock,
     product.description = req.body.description
+    product.discount = req.body.discount ? true:false,
+    product.discountPrice = req.body.discount ? req.body.discountPrice: 0
 
     const updatedProduct = await product.save()
     res.status(201).json(updatedProduct)
@@ -84,7 +86,9 @@ exports.createProduct = asyncHandler (async (req, res) => {
     category: req.body.category === 'Add New Category' ? req.body.newCategoryId:req.body.category,
     countInStock: req.body.countInStock,
     numReviews: 0,
-    description: req.body.description
+    description: req.body.description,
+    discount: req.body.discount ? true:false,
+    discountPrice: req.body.discount ? req.body.discountPrice: 0
   })
 
   const createdProduct = await product.save()

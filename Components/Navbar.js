@@ -191,7 +191,9 @@ const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passTo
     if(displayCart){
       NavCartRef.current.passDownItems(cartItems)
     }
-    passToBottom(cartItems)
+    if(passToBottom){
+      passToBottom(cartItems)
+    }
   }, [cartItems])
 
   const searchHandler = () =>{

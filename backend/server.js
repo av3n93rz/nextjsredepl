@@ -10,6 +10,7 @@ const CategoryRoutes = require('./routes/CategoryRoutes')
 const UploadRoutes = require('./routes/UploadRoutes')
 const OrderRoutes = require('./routes/OrderRoutes')
 const BraintreeRoutes = require('./routes/BraintreeRoutes');
+const DeleteFromCDNRoutes = require('./routes/DeleteFromCDNRoutes');
 const cookieParser = require('cookie-parser');
 const path = require('path')
 
@@ -37,6 +38,7 @@ app.prepare()
   server.use('/api/v1/categories', CategoryRoutes)
   server.use('/api/v1/brands', BrandRoutes)
   server.use('/api/v1/upload', UploadRoutes)
+  server.use('/api/v1/deleteFromCDN', DeleteFromCDNRoutes)
   server.use('/api/v1/orders', OrderRoutes)
   server.use('/api/v1/braintree', BraintreeRoutes)
 

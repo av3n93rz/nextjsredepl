@@ -1,27 +1,8 @@
 const express = require('express')
 const {protect, admin} = require('../middlewares/authMiddleware')
 const multer = require('multer')
-const ImageKit = require("imagekit");
-
+const {readImg} = require('../Controllers/imageKit')
 const router = express.Router()
-
-const imagekit = new ImageKit({
-    publicKey : "public_NIgiENDcwRcldcqTvAhgfYoksmU=",
-    privateKey : "private_pQDEscKzdfHjKxkt6Zn7IbRC0EU=",
-    urlEndpoint : "https://ik.imagekit.io/yy12fco4k5/"
-});
-
-const readImg = (image) =>{
-  return new Promise(function(resolve, reject){
-    imagekit.upload({
-      file : image, //required
-      fileName : "AvisProShop", //required
-      useUniqueFileName: true,
-    }, function(error, result) {
-      if(error) reject(error);
-      else resolve(result);
-    })
-})}
 
 const storage = multer.memoryStorage();
 const upload = multer({

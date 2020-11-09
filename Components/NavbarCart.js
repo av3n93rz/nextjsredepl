@@ -108,8 +108,6 @@ const NavbarCart = forwardRef(({cartItems, removeFromCartHandler, clearNavCartSt
   const [placement, setPlacement] = useState();
   const [items, setItems] = useState(cartItems)
 
-  console.log(items)
-
   const updateSize = useCallback(() => {
     if(window.innerWidth <= 750){
       handleClickAway()

@@ -62,6 +62,7 @@ const headCells = [
   { id: 'rating', numeric: true, disablePadding: false, label: 'Rating' },
   { id: 'count', numeric: true, disablePadding: false, label: 'Count In Stock' },
   { id: 'price', numeric: true, disablePadding: false, label: 'Price' },
+  { id: 'sale', numeric: true, disablePadding: false, label: 'On Sale' },
 ];
 
 function EnhancedTableHead(props) {
@@ -205,7 +206,7 @@ const EnhancedTable = ({products, setDeleteState}) => {
   
   const rows = [];
 
-  products.map((item)=>{rows.push({name:item.name, category:item.category.name, brand:item.brand.name, rating:item.rating, count:item.countInStock, price:item.price, id:item._id})})
+  products.map((item)=>{rows.push({name:item.name, category:item.category.name, brand:item.brand.name, rating:item.rating, count:item.countInStock, price:item.price, sale:item.discountPrice, id:item._id})})
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -326,13 +327,14 @@ const EnhancedTable = ({products, setDeleteState}) => {
                       <TableCell align="left">{row.brand}</TableCell>
                       <TableCell align="right">{row.rating}</TableCell>
                       <TableCell align="right">{row.count}</TableCell>
-                      <TableCell align="right">{row.price}</TableCell>
+                      <TableCell align="right">${row.price}</TableCell>
+                      <TableCell align="right">${row.sale}</TableCell>
                     </StyledTableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <StyledTableRow style={{ height: 33 * emptyRows }}>
-                  <TableCell colSpan={7} />
+                  <TableCell colSpan={8} />
                 </StyledTableRow>
               )}
             </TableBody>

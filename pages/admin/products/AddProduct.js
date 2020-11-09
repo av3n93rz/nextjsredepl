@@ -62,6 +62,9 @@ const useStyles = makeStyles((theme) => ({
   },
   ButtonMargin: {
     margin: '0 20px'
+  },
+  saleContainer:{
+    display: 'flex'
   }
 }));
 
@@ -80,6 +83,8 @@ const AddProduct = ({userAuth, categories, brands}) => {
     price: undefined,
     category: "",
     newCategory:undefined,
+    discount: false,
+    discountPrice: undefined,
     brand: "",
     newBrand: undefined,
     description: "",
@@ -194,6 +199,10 @@ const AddProduct = ({userAuth, categories, brands}) => {
     console.log(searchValue, category)
   }
 
+  const handleCheck = () =>{
+    setProduct({...product, discount: !product.discount})
+  }
+
 return <>
   <Head>
     <title>Add Product</title>
@@ -215,6 +224,15 @@ return <>
     <form className={classes.form} onSubmit={submitHandler}>
       <TextField required className={classes.inputField} type="text" label="Product name" value={product.name} onChange={(e)=> setProduct({...product, name:e.target.value})}/>
       <TextField required className={classes.inputField} type="number" label="Price" value={product.price} onChange={(e)=> setProduct({...product, price:e.target.value})}/>
+      <div className={classes.saleContainer}>
+        <input type='checkbox' id='sale' name='sale' checked={product.discount} onChange={()=>handleCheck()}/>
+        <label htmlFor='sale'>
+          <Typography variant="subtitle2" color="textSecondary" component="p">
+            On sale
+          </Typography>
+        </label>
+      </div>
+      {product.discount && <TextField required className={classes.inputField} type="number" label="Discount Price" value={product.discountPrice} onChange={(e)=> setProduct({...product, discountPrice:e.target.value})}/>}
       <TextField required multiline={true} className={classes.inputField} type="text" label="Description" value={product.description} onChange={(e)=> setProduct({...product, description:e.target.value})}/>
       <FormControl required className={classes.formControl}>
         <InputLabel id="select-category-label">Category</InputLabel>

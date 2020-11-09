@@ -15,7 +15,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Link from '@material-ui/core/Link';
 import {DropzoneArea} from 'material-ui-dropzone'
-import Router from 'next/router'
 import Typography from '@material-ui/core/Typography';
 import Image from 'next/image'
 import GetProduct from '../../../../Components/hocs/GetProduct'
@@ -23,6 +22,13 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Fab from '@material-ui/core/Fab';
+import Dialog from '@material-ui/core/Dialog';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogActions from '@material-ui/core/DialogActions';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -59,9 +65,6 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '50px',
     marginBottom: '50px',
   },
-  Visibility:{
-    display: 'none'
-  },
   buttonContainer:{
     display: 'flex',
     justifyContent: 'center'
@@ -94,13 +97,21 @@ const useStyles = makeStyles((theme) => ({
     top: '10px',
     right: '10px',
     opacity: '0'
-  }
+  },
+  saleContainer:{
+    display: 'flex'
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
 }));
 
 const EditProduct = ({userAuth, categories, brands, productObj}) => {
   const classes = useStyles();
   const [selectedFiles, setSelectedFiles] = useState([])
-  const [reload, setReload] = useState(false)
   const [success, setSuccess] = useState(false)
   const [status, setStatus] = useState({
     info:false,
@@ -114,20 +125,27 @@ const EditProduct = ({userAuth, categories, brands, productObj}) => {
     newCategory:undefined,
     brand: productObj.brand._id,
     newBrand: undefined,
+    discount: productObj.discount,
+    discountPrice: productObj.discountPrice,
     description: productObj.description,
     countInStock: productObj.countInStock,
   })
   const [created, setCreated] = useState("")
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    msg: undefined
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    target: undefined
+  });
 
-  useEffect(()=>{
-    if(reload){
-      Router.reload(window.location.pathname);
-    }
-  },[reload])
-
-  const AddAnOtherHandler = () =>{
-    setReload(true)
-  }
+  const handleClickOpen = (img) => {
+    setDeleteDialog({open: true, target:img});
+  };
+  const handleClose = () => {
+    setDeleteDialog({open:false, target: undefined});
+  };
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -187,7 +205,7 @@ const EditProduct = ({userAuth, categories, brands, productObj}) => {
 
   const submitHandler = async (e) =>{
     e.preventDefault()
-    document.querySelector('form').classList.toggle('makeStyles-Visibility-9')
+    document.querySelector('form').style.display = 'none'
     scrollToTop()
     let images
     let newBrandId
@@ -215,39 +233,104 @@ const EditProduct = ({userAuth, categories, brands, productObj}) => {
     setSuccess(true)
     } catch (error) {
       console.error(error)
-      document.querySelector('form').classList.toggle('makeStyles-Visibility-9')
+      document.querySelector('form').style.display = 'flex'
     }
-  }
-
-  const passToBottom = () =>{
-    return
   }
 
   const searchRequestHandler = (searchValue, category) => {
     console.log(searchValue, category)
   }
 
+  const handleCheck = () =>{
+    setProduct({...product, discount: !product.discount})
+  }
+
+  const deleteImage = async (target) =>{
+    handleClose()
+    try {
+      const config = {
+        headers: {
+          'Content-Type':'application/json',
+        }
+      }
+      const status = await axios.delete(`/api/v1/deleteFromCDN/${target.fileId}`,)
+      if(status === 204){
+        let images = product.image
+        images.splice(images.indexOf(target), 1)
+        setProduct({...product, image:images})
+        try{
+          await axios.put(`/api/v1/products/${productObj._id}`, {...product}, config)
+          setSnackbar({open: true, msg:'The image has been deleted'})
+        } catch (error) {
+          setSnackbar({open: true, msg:error.message})
+        }
+      }
+    } catch (error) {
+      setSnackbar({open: true, msg:error.response.data.error.message})
+      console.error(error)
+    }
+  }
+
+  const handleCloseSnack = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({open: false, msg: undefined});
+  };
+
+  const action = (
+    <>
+      <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnack}>
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  );
+
 return <>
   <Head>
-    <title>Add Product</title>
-    <meta name="description" content='Add new product and categories to the catalog.' />
+    <title>Edit {product.name}</title>
+    <meta name="description" content='Edit products in the catalog' />
   </Head>
-  <Navbar user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
+  <Navbar user={userAuth && userAuth} trigger={searchRequestHandler}/>
   <Container maxWidth="sm" className={classes.Container}>
     <h1>Edit {product.name}</h1>
+    <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnack} message={snackbar.msg} action={action}/>
     {success && <Alert variant="filled" color="success" severity="success" className={classes.infoBar}>{`${created} has been created!`}</Alert>}
     {status.info && <Alert variant="filled" color="info" severity="info" className={classes.infoBar}>{status.message}</Alert>}
     <div className={classes.buttonContainer}>
       {success&& <>
         <Typography variant="h6" color="textSecondary" component="p" className={classes.cardTitle}>Go to </Typography>
-        <Link href='/admin/ProductList' underline='none' className={classes.ButtonMargin}><Button variant="contained" color="primary">Product List</Button></Link>
-        <Typography variant="h6" color="textSecondary" component="p" className={classes.cardTitle}> or </Typography>
-        <Button variant="contained" color="primary" className={classes.ButtonMargin} onClick={AddAnOtherHandler}>Add More Products</Button></>
+        <Link href='/admin/products/ProductList' underline='none' className={classes.ButtonMargin}><Button variant="contained" color="primary">Product List</Button></Link>
+        </>
       }
     </div>
+    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={deleteDialog.open}>
+        <MuiDialogContent dividers>
+          <Typography gutterBottom>
+          Are you sure you want to delete this image?
+          </Typography>
+        </MuiDialogContent>
+        <MuiDialogActions>
+          <Button autoFocus onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button autoFocus onClick={()=>deleteImage(deleteDialog.target)} color="primary">
+            Delete
+          </Button>
+        </MuiDialogActions>
+      </Dialog>
     <form className={classes.form} onSubmit={submitHandler}>
       <TextField required className={classes.inputField} type="text" label="Product name" value={product.name} onChange={(e)=> setProduct({...product, name:e.target.value})}/>
       <TextField required className={classes.inputField} type="number" label="Price" value={product.price} onChange={(e)=> setProduct({...product, price:e.target.value})}/>
+      <div className={classes.saleContainer}>
+        <input type='checkbox' id='sale' name='sale' checked={product.discount} onChange={()=>handleCheck()}/>
+        <label htmlFor='sale'>
+          <Typography variant="subtitle2" color="textSecondary" component="p">
+            On sale
+          </Typography>
+        </label>
+      </div>
+      {product.discount && <TextField required className={classes.inputField} type="number" label="Discount Price" value={product.discountPrice} onChange={(e)=> setProduct({...product, discountPrice:e.target.value})}/>}
       <TextField required multiline={true} className={classes.inputField} type="text" label="Description" value={product.description} onChange={(e)=> setProduct({...product, description:e.target.value})}/>
       <FormControl required className={classes.formControl}>
         <InputLabel id="select-category-label">Category</InputLabel>
@@ -278,12 +361,12 @@ return <>
       <Grid item xs={12}>
         <Grid container justify="center" spacing={2}>
           {product.image.map((img) => (
-            <Grid item>
+            <Grid item key={img.fileId}>
               <Paper className={classes.ImgPaper}>
                 <Link href={img.url} underline='none'>
                   <Image src={img.url} alt={product.name} unsized={true} className={classes.existingImgs}/>
                 </Link>
-                <Fab className={classes.delFab}>
+                <Fab className={classes.delFab} onClick={() =>handleClickOpen(img)}>
                   <DeleteIcon/>
                 </Fab>
               </Paper>
@@ -295,7 +378,7 @@ return <>
       <div className={classes.dropzoneContainer}>
       <DropzoneArea onChange={(files) => setSelectedFiles(files)} acceptedFiles={['image/*']} showAlerts={false} maxFileSize={10000000} filesLimit={6} previewGridClasses={{container:"makeStyles-dropzonePreviewContainer-6", item:"makeStyles-dropzoneImageContainer-5"}}/>
       </div>
-      <Button variant="contained" color="primary" type="submit">Add Product</Button>
+      <Button variant="contained" color="primary" type="submit">Update Product</Button>
     </form>    
   </Container>
 </>
