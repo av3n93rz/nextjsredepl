@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   slide2:{
-    backgroundColor: theme.palette.secondary.light,
+    backgroundColor: theme.palette.secondary.dark,
     height: '450px',
     display: 'flex !important',
     position: 'relative',
@@ -72,11 +72,11 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('mdl')]: {
       transform: 'translateX(-50%)',
       lineHeight: '50px',
-      top: '400px',
+      top: '420px',
       textAlign: 'center',
     },
     [theme.breakpoints.down('smd')]: {
-      top: '400px',
+      top: '425px',
       fontSize: '2.5rem',
       lineHeight: '35px',
     },

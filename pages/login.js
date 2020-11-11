@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '460px',
     margin: '0 auto',
     marginTop: '50px',
+    marginBottom: '15px'
   },
   inputField: {
     display: 'flex',

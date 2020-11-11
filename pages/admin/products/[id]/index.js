@@ -247,28 +247,29 @@ const EditProduct = ({userAuth, categories, brands, productObj}) => {
 
   const deleteImage = async (target) =>{
     handleClose()
-    try {
-      const config = {
-        headers: {
-          'Content-Type':'application/json',
-        }
+      try {
+            await axios.delete(`/api/v1/deleteFromCDN/${target.fileId}`,)
+          }
+      catch (error) {
+        setSnackbar({open: true, msg:error.response.data.error.message})
+        console.error(error)
       }
-      const status = await axios.delete(`/api/v1/deleteFromCDN/${target.fileId}`,)
-      if(status === 204){
-        let images = product.image
-        images.splice(images.indexOf(target), 1)
-        setProduct({...product, image:images})
-        try{
-          await axios.put(`/api/v1/products/${productObj._id}`, {...product}, config)
-          setSnackbar({open: true, msg:'The image has been deleted'})
-        } catch (error) {
-          setSnackbar({open: true, msg:error.message})
+      
+      let images = product.image
+      images.splice(images.indexOf(target), 1)
+      setProduct({...product, image:images})
+      try{
+        const config = {
+          headers: {
+            'Content-Type':'application/json',
+          }
         }
+        await axios.put(`/api/v1/products/${productObj._id}`, {...product}, config)
+        setSnackbar({open: true, msg:'The image has been deleted'})
       }
-    } catch (error) {
-      setSnackbar({open: true, msg:error.response.data.error.message})
-      console.error(error)
-    }
+      catch (error) {
+        setSnackbar({open: true, msg:error.message})
+      }
   }
 
   const handleCloseSnack = (event, reason) => {
