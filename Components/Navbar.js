@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passToBottom, displayCart = true}) => {
+const Navbar = withRouter(({router, user, inputRef, setCheckout, passToBottom, displayCart = true, searchable= true, showButtons = true}) => {
   const NavCartRef = useRef(null);
   const classes = useStyles();
   const [searchValue, setSearchValue] = useState("");
@@ -197,7 +197,7 @@ const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passTo
   }, [cartItems])
 
   const searchHandler = () =>{
-    trigger(searchValue, category)
+    console.log(searchValue, category)
   }
   
   useImperativeHandle(inputRef, () => ({
@@ -239,36 +239,38 @@ const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passTo
               priority={true}
             />
           </Link>
-          <div className={classes.search}>
-            <div className={classes.searchCategory}>
-              <span className={classes.searchSpan}>
-              {category}
-              </span>
-            <ArrowDropDownIcon style={{height:'39px'}}/>
+          {searchable &&
+            <div className={classes.search}>
+              <div className={classes.searchCategory}>
+                <span className={classes.searchSpan}>
+                {category}
+                </span>
+              <ArrowDropDownIcon style={{height:'39px'}}/>
+              </div>
+              <select name="categories" id="categories" className={classes.selectCategory} onChange={(e)=> setCategory(e.target.value)}>
+                <option label="All" value="All">All</option>
+                <option label="Phones" value="Phones">Phones</option>
+                <option label="Cameras" value="Cameras">Cameras</option>
+              </select>
+              <InputBase
+                placeholder="Search…"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                inputProps={{ 'aria-label': 'search' }}
+                value={searchValue}
+                onChange={(e)=>setSearchValue(e.target.value)}
+              />
+              <div className={classes.searchIcon} onClick={searchHandler}>
+              <SearchIcon />
+              </div>
             </div>
-            <select name="categories" id="categories" className={classes.selectCategory} onChange={(e)=> setCategory(e.target.value)}>
-              <option label="All" value="All">All</option>
-              <option label="Phones" value="Phones">Phones</option>
-              <option label="Cameras" value="Cameras">Cameras</option>
-            </select>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-              value={searchValue}
-              onChange={(e)=>setSearchValue(e.target.value)}
-            />
-            <div className={classes.searchIcon} onClick={searchHandler}>
-            <SearchIcon />
-            </div>
-          </div>
+          }
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
            {displayCart && <NavbarCart cartItems={cartItems} removeFromCartHandler={removeFromCartHandler} clearNavCartState={setCartItems} ref={NavCartRef}/>}
-            {user ? 'isAdmin' in user ? (<AdminDrawer user={user}/>):router.pathname === "/login" ? "":(
+            {showButtons ? user ? 'isAdmin' in user ? (<AdminDrawer user={user}/>):router.pathname === "/login" ? "":(
               <Link href="/login" underline={'none'}>
                 <Button variant="contained" color="primary" className={classes.buttons}>{"Login"}</Button>
               </Link>
@@ -276,10 +278,9 @@ const Navbar = withRouter(({router, user, trigger, inputRef, setCheckout, passTo
               <Link href="/login" underline={'none'}>
                 <Button variant="contained" color="primary" className={classes.buttons}>{"Login"}</Button>
               </Link>
-              )}
+              ):''}
           </div>
           <div className={classes.sectionMobile}>
-
             <AdminDrawer user={user} isMobile={true}/>
           </div>
         </Toolbar>

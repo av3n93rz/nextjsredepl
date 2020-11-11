@@ -115,3 +115,19 @@ exports.signupApi = user =>{
     console.log(err)
   })
 }
+
+exports.verify = hash =>{
+  return fetch(`${AppUrl}/api/v1/users/verify/${hash}`, {
+    method: 'POST',
+    headers:{
+      Accept: 'application/json',
+      "Content-Type": "application/json",
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+}
