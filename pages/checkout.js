@@ -694,7 +694,7 @@ const useStyles = makeStyles((theme) => ({
         const paymentResult = {
           transaction_id: response.transaction.id,
           amount: response.transaction.amount,
-          status: response.success === true ? 'paid':'notPaid',
+          status: response.success === true ? 'Paid':'Not paid',
           email_address: userAuth.email,
           update_time: response.transaction.updatedAt,
         }
@@ -763,7 +763,7 @@ const useStyles = makeStyles((theme) => ({
                   {orderItems.map((item)=> (
                     <div className={classes.cartItemContainer}>
                       <div className={classes.cartItemImageContainer}>
-                        <Image src={`${item.image}`} alt={item.name} unsized={true} className={classes.cartItemImage}/>
+                        <Image src={`${item.image}`} alt={item.name} className={classes.cartItemImage}/>
                       </div>
                       <div>
                         <Link href={`/product/id?product=${item.id}`} underline={'none'}>

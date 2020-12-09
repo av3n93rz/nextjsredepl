@@ -12,7 +12,9 @@ import 'slick-carousel/slick/slick-theme.css'
 import Slider from 'react-slick'
 import Image from 'next/image'
 import Typography from '@material-ui/core/Typography';
-
+import axios from 'axios'
+import Pagination from '@material-ui/lab/Pagination';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -86,6 +88,12 @@ const useStyles = makeStyles((theme) => ({
   },
   mainContainer:{
     marginBottom: '125px'
+  },
+  pagination:{
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '15px',
+    marginTop: '15px'
   }
 }));
 
@@ -94,6 +102,41 @@ const useStyles = makeStyles((theme) => ({
   const BottomCart = useRef(null);
   const classes = useStyles();
   const [displayedProducts, setDisplayedProducts] = useState(products)
+  const [currentPage, setCurrentPage] = useState(page)
+  const [firstLoad, setFirstLoad] = useState(true)
+  const [loadingContent, setLoadingContent] = useState(false)
+  const [favorites, setFavorites] = useState(userAuth && userAuth.favorites || [])
+
+
+  useEffect(()=>{
+    setDisplayedProducts([...displayedProducts])
+  }, [favorites])
+
+  useEffect(()=>{
+    if(!firstLoad){
+      const getPageProducts = async() =>{
+        try {
+          const data = await axios.get(`/api/v1/products?pageNumber=${currentPage}`)
+          if(data.status === 200){
+            setDisplayedProducts([...data.data.products])
+            setLoadingContent(false)
+            if(screen.availHeight > screen.availWidth){
+              document.getElementById('top_pagination').scrollIntoView({block:'center'})
+            } else {
+              window.scrollTo({
+                top: 0,
+                behavior: "auto"
+              });
+            }
+          }
+          return
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      getPageProducts()
+    }
+  }, [currentPage])
 
   const searchRequestHandler = (searchValue, category) => {
     console.log(searchValue, category)
@@ -115,6 +158,43 @@ const useStyles = makeStyles((theme) => ({
     childNav.current.clearCart()
   }
 
+  const toggleFavorites = async(id) =>{
+    const setFavs_db = async(typeOfAction) =>{
+      try {
+        const config = {
+          headers: {
+            'Content-Type':'application/json',
+          }
+        }
+        const {status} = await axios.post(`/api/v1/users/favorites/${userAuth._id}`, { itemId:id, TOA: typeOfAction}, config)
+        return status
+        } catch (error) {
+          console.error(error)
+        }
+    }
+    let index = favorites.indexOf(id)
+    if( index < 0){
+      let dbstatus = await setFavs_db(true)
+      if(dbstatus === 200){
+        setFavorites([...favorites, id])
+      }
+    } else {
+      let dbstatus = await setFavs_db(false)
+      if(dbstatus === 200){
+        setFavorites([...favorites.slice(0, index), ...favorites.slice(index+1)])
+      }
+    }
+  }
+
+  const handlePages = (event, value) =>{
+    if(value !== currentPage){
+      setLoadingContent(true)
+      setDisplayedProducts([])
+      setFirstLoad(false)
+      setCurrentPage(value)
+    }
+  }
+
   return (
     <>
     <Head>
@@ -124,23 +204,25 @@ const useStyles = makeStyles((theme) => ({
     <Navbar ref={childNav} user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
       <Slider className={classes.slider}>
         <div className={classes.slide1}>
-          <Typography variant="h6" component="p" className={classes.slideTitle}>{products[14].name}</Typography>
+          <Typography variant="h6" component="p" className={classes.slideTitle}>{products[11].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[14].image[0].url}`} priority={true} alt={products[14].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[11].image[0].url}`} priority={true} alt={products[11].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
         <div className={classes.slide2}>
-        <Typography variant="h6" component="p" className={classes.slideTitle}>{products[24].name}</Typography>
+        <Typography variant="h6" component="p" className={classes.slideTitle}>{products[2].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[24].image[0].url}`} priority={true} alt={products[24].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[2].image[0].url}`} priority={true} alt={products[2].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
       </Slider>
       <Container maxWidth="lg" className={classes.mainContainer}>
-        <h1>Latest Products</h1>
+        <Pagination id='top_pagination' count={pages} page={currentPage} onChange={handlePages} className={classes.pagination}/>
+        {loadingContent && <div className={classes.pagination}><CircularProgress color="secondary"/></div>}
         <Grid container spacing={4} style={{justifyContent:"center"}}>
-          {displayedProducts.map((product)=> (<Grid item key={product._id}><ProductCard product={product} addToCartItems={addToCartItems}/></Grid>))}
+          {displayedProducts.map((product)=> (<Grid item key={product._id}><ProductCard product={product} isFavorite={favorites.indexOf(product._id) < 0 ? false:true} addToCartItems={addToCartItems} toggleFavorites={toggleFavorites}/></Grid>))}
         </Grid>
+        {!loadingContent && <Pagination count={pages} page={currentPage} onChange={handlePages} className={classes.pagination}/>}
       </Container>
       <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
     </>

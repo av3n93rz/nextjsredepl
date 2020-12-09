@@ -1,18 +1,19 @@
 import React, {useState, useEffect} from 'react';
 import Head from 'next/head'
 import { makeStyles} from '@material-ui/core/styles';
-import ListAdminProducts from '../../../Components/hocs/ListAdminProducts'
+import ListUsers from '../../../Components/hocs/ListUsers'
 import PrivateRoute from '../../../Components/hocs/PrivateRoute';
 import {Container} from '@material-ui/core';
 import Navbar from '../../../Components/Navbar'
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
-import EnhancedTable from '../../../Components/AdminProductListTable'
+import EnhancedTable from '../../../Components/AdminUserListTable'
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Alert from '@material-ui/lab/Alert';
 import TableChips from '../../../Components/TableChips'
+
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -20,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
   searchArea:{
     width: '100%',
-    marginBottom: '50px',
+    marginBottom: '25px',
     display: 'flex',
     justifyContent: 'center',
   },
@@ -30,32 +31,42 @@ const useStyles = makeStyles((theme) => ({
   infoBar:{
     marginBottom: '25px'
   },
+  rotateCancel:{
+    transform: 'rotate(45deg)'
+  },
+  Chips:{
+    width: '100%',
+    margin: '5px auto'
+  },
+  disabledChip:{
+    pointerEvents: 'none',
+    '&:hover':{
+      backgroundColor: theme.palette.primary.light
+    },
+    '& svg':{
+      pointerEvents: 'auto',
+      '&:hover':{
+
+      }
+    }
+  }
 }));
 
-const ProductList = ({products, userAuth}) => {
+const UserList = ({users, userAuth}) => {
   const classes = useStyles();
   const [searchQuery, setSearchQuery] = useState("");
-  const [prodsState, setProdsState] = useState(products);
+  const [prodsState, setProdsState] = useState(users);
   const [searchCol, setSearchCol] = useState('name');
   const [notanum, setNotanum] = useState(false);
   const [display, setDisplay] = React.useState({
+    id: {disp:true, title: 'Id'},
     name: {disp:true, title: 'Name'},
-    category: {disp:true, title: 'Category'},
-    brand: {disp:true, title: 'Brand'},
-    rating: {disp:true, title: 'Rating'},
-    count: {disp:true, title: 'Count In Stock'},
-    price: {disp:true, title: 'Price'},
-    sale: {disp:true, title: 'On Sale'},
+    email: {disp:true, title: 'Email'},
+    isAdmin: {disp:true, title: 'Role'},
+    createdAt: {disp:true, title: 'Created At'},
   });
 
-  useEffect(()=>{
-    if((searchCol === 'rating' || searchCol === 'countInStock' || searchCol === 'price') && (isNaN(searchQuery))){
-      setNotanum(true)
-    } else {
-      setNotanum(false)
-    }
-  }, [searchQuery, searchCol])
-
+  
   const passToBottom = () =>{
     return
   }
@@ -63,7 +74,7 @@ const ProductList = ({products, userAuth}) => {
   const searchRequestHandler = (searchValue, category) => {
     console.log(searchValue, category)
   }
-  
+
   const handleDelete = (key) =>{
     setDisplay({...display, [key]: {title:display[key].title, disp: false}})
   }
@@ -74,8 +85,8 @@ const ProductList = ({products, userAuth}) => {
   return (
     <>
     <Head>
-        <title>Admin | List Products</title>
-      <meta name="description" content='A list of the products in the system. You can edit and delete them here.' />
+        <title>Admin | List Users</title>
+      <meta name="description" content='A list of the Users in the system. You can edit and delete them here.' />
     </Head>
     <Navbar user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
     <Container maxWidth="md" className={classes.container}>
@@ -89,23 +100,19 @@ const ProductList = ({products, userAuth}) => {
             id="select-search-col"
             value={searchCol}
             onChange={(e)=> setSearchCol(e.target.value)}>
-            {Object.keys(display).map((key)=>( key !=='sale' && <MenuItem key={key} value={key}>{display[key].title}</MenuItem>))}
+            <MenuItem key={'name'} value={'name'}>Name</MenuItem>
+            <MenuItem key={'_id'} value={'_id'}>Id</MenuItem>
+            <MenuItem key={'email'} value={'email'}>Email</MenuItem>
           </Select>
         </FormControl>
       </div>
-      <TableChips chips={display} handleDelete={handleDelete} handleDisplay={handleDisplay} returnTag={'name'}/>
-      <EnhancedTable products={searchQuery ? searchCol === 'name' ?
+      <TableChips chips={display} handleDelete={handleDelete} handleDisplay={handleDisplay} returnTag={'id'}/>
+      <EnhancedTable users={searchQuery ? searchCol === 'name' ?
         prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
         :
-        searchCol === 'brand' ? prodsState.filter(el=> el[searchCol].name.toLowerCase().includes(searchQuery.toLowerCase()))
+        searchCol === 'email' ?  prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
         :
-        searchCol === 'category' ? prodsState.filter(el=> el[searchCol].name.toLowerCase().includes(searchQuery.toLowerCase()))
-        :
-        searchCol === 'rating' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
-        :
-        searchCol === 'countInStock' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
-        :
-        searchCol === 'price' ? isNaN(searchQuery) ? prodsState : prodsState.filter(el=> el[searchCol].toString().startsWith(searchQuery))
+        searchCol === '_id' ? prodsState.filter(el=> el[searchCol].toLowerCase().includes(searchQuery.toLowerCase()))
         :
         prodsState
         :
@@ -116,9 +123,9 @@ const ProductList = ({products, userAuth}) => {
   );
 }
 
-ProductList.getInitialProps = async (products) => {
-  return products
+UserList.getInitialProps = async (users) => {
+  return users
 }
 
-export default PrivateRoute(ListAdminProducts(ProductList))
+export default PrivateRoute(ListUsers(UserList))
 

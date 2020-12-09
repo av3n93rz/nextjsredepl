@@ -23,8 +23,8 @@ import IsLoggedIn from '../Components/hocs/IsLoggedIn'
 import {signupApi} from '../core/apiCore'
 import EmailIcon from '@material-ui/icons/Email';
 import Alert from '@material-ui/lab/Alert';
-import BottomNavbar from '../Components/BottomNavbar'
 import Router from 'next/router'
+import Image from 'next/image'
 
 const useStyles = makeStyles((theme) => ({
   login_Card: {
@@ -62,7 +62,23 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
     margin:'0 auto',
     textAlign: 'center',
-  }
+  },
+  AuthSvg:{
+    position: 'absolute',
+    zIndex: '-1',
+    top: '300px',
+    left: '45%',
+    [theme.breakpoints.down('smd')]: {
+      top: '460px',
+      left: '30%',
+      width: '450px'
+    },
+    [theme.breakpoints.down('xs')]: {
+      top: '460px',
+      left: '20%',
+      width: '450px'
+    },
+  },
 }));
 
 const signup = () => {
@@ -82,18 +98,6 @@ const signup = () => {
     confirmPassword: '',
     showConfirmPassword: false,
   });
-
-  const searchRequestHandler = (searchValue, category) => {
-    console.log(searchValue, category)
-  }
-
-  const addToCartItems = (product) => {
-    childNav.current.addToCartItems(product)
-  }  
-
-  const passToBottom = (cartItems) =>{
-    BottomCart.current.passDownItems(cartItems)
-  }
 
   const removeFromCartHandler = (id) =>{
     childNav.current.removeItemHandler(id)
@@ -164,8 +168,11 @@ const signup = () => {
       <title>Webshop | Sign Up</title>
       <meta name="description" content="Create your Avi\'s shop account!"/>
     </Head>
-    <Navbar ref={childNav} trigger={searchRequestHandler} passToBottom={passToBottom}/>
+    <Navbar displayCart={false} searchable={false}/>
     <Container>
+      <div className={classes.AuthSvg}>
+        <Image src={'/svg/undraw_personal_information_962o.svg'} alt={'auth_svg'} width={'580px'} height={'400px'}/>
+      </div>
       <Card className={classes.login_Card}>
         <CardContent className={classes.card_Content}>
             <Typography className={classes.h1_title} variant="h1" noWrap>
@@ -247,7 +254,6 @@ const signup = () => {
         </CardContent>
       </Card>
     </Container>
-    <BottomNavbar ref={BottomCart} removeFromCartHandler={removeFromCartHandler} clearNavCartState={clearNavCartState}/>
     </>
   )
 }

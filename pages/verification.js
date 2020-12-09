@@ -78,6 +78,8 @@ const Verification = ({verified}) => {
             {status.msg === 'Account verified!' ? 
             <Image src={'/svg/undraw_completed_ngx6.svg'} alt={'verified_svg'} width={'290px'} height={'200px'}/>
             :
+            status.msg === 'We have sent you a verification email!' ? <Image src={'/svg/undraw_Mail_sent_re_0ofv.svg'} alt={'verified_svg'} width={'290px'} height={'200px'}/>
+            :
             <Image src={'/svg/undraw_cancel_u1it.svg'} alt={'verified_svg'} width={'290px'} height={'200px'}/>
           }
           </div>

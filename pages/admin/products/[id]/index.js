@@ -365,7 +365,7 @@ return <>
             <Grid item key={img.fileId}>
               <Paper className={classes.ImgPaper}>
                 <Link href={img.url} underline='none'>
-                  <Image src={img.url} alt={product.name} unsized={true} className={classes.existingImgs}/>
+                  <Image src={img.url} alt={product.name} layout='fill' className={classes.existingImgs}/>
                 </Link>
                 <Fab className={classes.delFab} onClick={() =>handleClickOpen(img)}>
                   <DeleteIcon/>
