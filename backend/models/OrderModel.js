@@ -66,10 +66,10 @@ const orderSchema = mongoose.Schema({
   paidAt: {
     type: String
   },
-  isDelivered: {
-    type: Boolean,
-    required:true,
-    default: false
+  status: {
+    type: String,
+    default: "Not processed",
+    enum: ["Not processed", "Processing", "Shipped", "Delivered", "Cancelled"]
   },
   deliveredAt: {
     type: Date

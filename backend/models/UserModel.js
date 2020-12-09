@@ -23,6 +23,9 @@ const userSchema = new mongoose.Schema({
   activated: {
     type: String,
     required:true,
+  },
+  favorites:{
+    type: Array
   }
 }, {
   timestamps: true
