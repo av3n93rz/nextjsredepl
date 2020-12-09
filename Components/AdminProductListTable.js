@@ -14,12 +14,10 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import Link from '@material-ui/core/Link';
 import axios from 'axios'
 import DeleteDialog from './DeleteDialog'
+import Snackbar from '@material-ui/core/Snackbar';
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
@@ -55,68 +53,6 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
-  { id: 'category', numeric: false, disablePadding: true, label: 'Category' },
-  { id: 'brand', numeric: false, disablePadding: true, label: 'Brand' },
-  { id: 'rating', numeric: true, disablePadding: false, label: 'Rating' },
-  { id: 'count', numeric: true, disablePadding: false, label: 'Count In Stock' },
-  { id: 'price', numeric: true, disablePadding: false, label: 'Price' },
-  { id: 'sale', numeric: true, disablePadding: false, label: 'On Sale' },
-];
-
-function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all desserts' }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </span>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-EnhancedTableHead.propTypes = {
-  classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
-};
 
 const useToolbarStyles = makeStyles((theme) => ({
   root: {
@@ -196,13 +132,79 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const EnhancedTable = ({products, setDeleteState}) => {
+const EnhancedTable = ({products, setDeleteState, display}) => {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [message, setMessage] = React.useState('')
+  const [snack, setSnack] = React.useState(false);
+  
+const headCells = [
+  { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
+  { id: 'category', numeric: false, disablePadding: true, label: 'Category' },
+  { id: 'brand', numeric: false, disablePadding: true, label: 'Brand' },
+  { id: 'rating', numeric: true, disablePadding: false, label: 'Rating' },
+  { id: 'count', numeric: true, disablePadding: false, label: 'Count In Stock' },
+  { id: 'price', numeric: true, disablePadding: false, label: 'Price' },
+  { id: 'sale', numeric: true, disablePadding: false, label: 'On Sale' },
+];
+
+function EnhancedTableHead(props) {
+  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell padding="checkbox">
+          <Checkbox
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{ 'aria-label': 'select all desserts' }}
+          />
+        </TableCell>
+        {headCells.map((headCell) => (
+          display[headCell['id']].disp &&
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'default'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <span className={classes.visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </span>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  numSelected: PropTypes.number.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+  onSelectAllClick: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  rowCount: PropTypes.number.isRequired,
+};
   
   const rows = [];
 
@@ -257,6 +259,7 @@ const EnhancedTable = ({products, setDeleteState}) => {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const removeRows = async (idArray) =>{
+    let length = idArray.length
     let productState = products
     for(let i = 0; i < idArray.length; i++){
       let itemIndex = products.indexOf(idArray[i]);
@@ -273,7 +276,17 @@ const EnhancedTable = ({products, setDeleteState}) => {
     }
     setDeleteState(productState)
     setSelected([])
+    length > 1 ? setMessage(`Products removed (${length})`):setMessage(`Product removed`)
+    setSnack(true);
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnack(false);
+    setMessage('')
+  };
 
   return (
     <>
@@ -323,12 +336,12 @@ const EnhancedTable = ({products, setDeleteState}) => {
                           {row.name}
                         </Link>
                       </TableCell>
-                      <TableCell align="left">{row.category}</TableCell>
-                      <TableCell align="left">{row.brand}</TableCell>
-                      <TableCell align="right">{row.rating}</TableCell>
-                      <TableCell align="right">{row.count}</TableCell>
-                      <TableCell align="right">${row.price}</TableCell>
-                      <TableCell align="right">${row.sale}</TableCell>
+                      {display.category.disp && <TableCell align="left">{row.category}</TableCell>}
+                      {display.brand.disp &&<TableCell align="left">{row.brand}</TableCell>}
+                      {display.rating.disp &&<TableCell align="right">{row.rating}</TableCell>}
+                      {display.count.disp &&<TableCell align="right">{row.count}</TableCell>}
+                      {display.price.disp &&<TableCell align="right">${row.price}</TableCell>}
+                      {display.sale.disp &&<TableCell align="right">${row.sale}</TableCell>}
                     </StyledTableRow>
                   );
                 })}
@@ -350,6 +363,12 @@ const EnhancedTable = ({products, setDeleteState}) => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <Snackbar
+        open={snack}
+        autoHideDuration={3000}
+        onClose={handleClose}
+        message={message}
+      />
     </>
   );
 }

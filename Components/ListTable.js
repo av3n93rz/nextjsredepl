@@ -17,8 +17,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import axios from 'axios'
 import DeleteDialog from './DeleteDialog'
-import moment from 'moment'
-
+import Snackbar from '@material-ui/core/Snackbar';
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
@@ -78,7 +77,7 @@ const useToolbarStyles = makeStyles((theme) => ({
 
 const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
-  const { numSelected, selected, remove, userState} = props;
+  const { numSelected, selected, remove, prodsState} = props;
 
   const removeHandler = (items) =>{
     remove(items)
@@ -96,11 +95,11 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          User List
+          Product List
         </Typography>
       )}
 
-      {numSelected > 0 && <DeleteDialog removeHandler={removeHandler} selected={selected} itemsState={userState} itemName={'user'}/>}
+      {numSelected > 0 && <DeleteDialog removeHandler={removeHandler} selected={selected} itemsState={prodsState} itemName={'product'}/>}
     </Toolbar>
   );
 };
@@ -116,8 +115,9 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     width: '100%',
     marginBottom: theme.spacing(2),
-    marginLeft: 'auto',
-    marginRight: 'auto',
+  },
+  table: {
+    minWidth: 750,
   },
   visuallyHidden: {
     border: 0,
@@ -132,24 +132,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const EnhancedTable = ({users, setDeleteState, display}) => {
+const EnhancedTable = ({products, setDeleteState, display, headCells, rows}) => {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('id');
+  const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  
+  const [message, setMessage] = React.useState('')
+  const [snack, setSnack] = React.useState(false);
 
-  
-const headCells = [
-  { id: 'id', numeric: false, disablePadding: false, label: 'Id' },
-  { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-  { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
-  { id: 'isAdmin', numeric: false, disablePadding: false, label: 'Role' },
-  { id: 'createdAt', numeric: false, disablePadding: false, label: 'Created At' },
-
-];
 
 function EnhancedTableHead(props) {
   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -205,10 +197,6 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
   
-  const rows = [];
-
-  users.map((item)=>{rows.push({id:item._id, name:item.name, email:item.email, admin: item.isAdmin ? "admin":"user" , created:item.createdAt})})
-
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -258,28 +246,39 @@ EnhancedTableHead.propTypes = {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const removeRows = async (idArray) =>{
-    let usState = users
+    let length = idArray.length
+    let productState = products
     for(let i = 0; i < idArray.length; i++){
-      let itemIndex = users.indexOf(idArray[i]);
+      let itemIndex = products.indexOf(idArray[i]);
       if(itemIndex > -1){
         try {
-          const {status} = await axios.delete(`/api/v1/users/${idArray[i]._id}`)
+          const {status} = await axios.delete(`/api/v1/products/${idArray[i]._id}`)
           if(status === 200){
-            usState.splice(itemIndex, 1)
+            productState.splice(itemIndex, 1)
           }
           } catch (error) {
             console.log(error.message)
           }
       }
     }
-    setDeleteState(usState)
+    setDeleteState(productState)
     setSelected([])
+    length > 1 ? setMessage(`Products removed (${length})`):setMessage(`Product removed`)
+    setSnack(true);
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnack(false);
+    setMessage('')
+  };
 
   return (
     <>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} selected={selected} remove={removeRows} userState={users}/>
+        <EnhancedTableToolbar numSelected={selected.length} selected={selected} remove={removeRows} prodsState={products}/>
         <TableContainer>
           <Table
             className={classes.table}
@@ -319,21 +318,13 @@ EnhancedTableHead.propTypes = {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        <Link href={`/admin/users/id?user=${row.id}`}>
-                          {row.id}
-                        </Link>
-                      </TableCell>
-                      {display.name.disp && <TableCell align="left">{row.name}</TableCell>}
-                      {display.email.disp && <TableCell align="left">{row.email}</TableCell>}
-                      {display.isAdmin.disp && <TableCell align="left">{row.admin}</TableCell>}
-                      {display.createdAt.disp && <TableCell align="right">{moment(row.created).format('YYYY.MM.DD.')}</TableCell>}
+                      {Object.keys(display).map((key)=>(display[key].link === true ? (display[key].disp && <TableCell align={display[key].align}><Link href={`/admin/products/id?product=${row.id}`}>{row[key]}</Link></TableCell>):display[key].disp && <TableCell align={display[key].align}>{row[key]}</TableCell>))}
                     </StyledTableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <StyledTableRow style={{ height: 33 * emptyRows }}>
-                  <TableCell colSpan={7} />
+                  <TableCell colSpan={8} />
                 </StyledTableRow>
               )}
             </TableBody>
@@ -349,6 +340,12 @@ EnhancedTableHead.propTypes = {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <Snackbar
+        open={snack}
+        autoHideDuration={3000}
+        onClose={handleClose}
+        message={message}
+      />
     </>
   );
 }

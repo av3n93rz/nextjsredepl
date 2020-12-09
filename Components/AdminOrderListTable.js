@@ -16,9 +16,11 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import axios from 'axios'
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
 import DeleteDialog from './DeleteDialog'
-import moment from 'moment'
-
+import StatusDialog from './StatusDialog'
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
@@ -78,10 +80,29 @@ const useToolbarStyles = makeStyles((theme) => ({
 
 const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
-  const { numSelected, selected, remove, userState} = props;
+  const { numSelected, selected, remove, ordState, statusValues, setOrderStatus} = props;
 
   const removeHandler = (items) =>{
     remove(items)
+  }
+
+  const statusUpdateHandler = async (id, status) =>{
+    if(status !== 'status'){
+      try {
+        const config = {
+          headers: {
+            'Content-Type':'application/json',
+          }
+        }
+        const orderStatus = await axios.post(`/api/v1/orders/admin/order/set-array-status/`, {status: status, array: id}, config)
+        if(orderStatus.status === 200){
+          setOrderStatus(id, status)
+        }
+      } 
+      catch (error) {
+        console.log(error.message)
+      }
+    }
   }
 
   return (
@@ -96,11 +117,12 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          User List
+          Order List
         </Typography>
       )}
 
-      {numSelected > 0 && <DeleteDialog removeHandler={removeHandler} selected={selected} itemsState={userState} itemName={'user'}/>}
+      {numSelected > 0 && <StatusDialog statusUpdateHandler={statusUpdateHandler} selected={selected} statusValues={statusValues} />}
+      {numSelected > 0 && <DeleteDialog removeHandler={removeHandler} selected={selected} itemsState={ordState} itemName={'product'}/>}
     </Toolbar>
   );
 };
@@ -116,8 +138,9 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     width: '100%',
     marginBottom: theme.spacing(2),
-    marginLeft: 'auto',
-    marginRight: 'auto',
+  },
+  table: {
+    minWidth: 750,
   },
   visuallyHidden: {
     border: 0,
@@ -129,26 +152,30 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: 20,
     width: 1,
+  },
+  statusCell:{
+    whiteSpace: 'nowrap'
   }
 }));
 
-const EnhancedTable = ({users, setDeleteState, display}) => {
+const EnhancedTable = ({orders, setDeleteState, display, statusValues, setOrderStatus}) => {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('id');
+  const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  
 
   
 const headCells = [
-  { id: 'id', numeric: false, disablePadding: false, label: 'Id' },
-  { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-  { id: 'email', numeric: false, disablePadding: false, label: 'Email' },
-  { id: 'isAdmin', numeric: false, disablePadding: false, label: 'Role' },
-  { id: 'createdAt', numeric: false, disablePadding: false, label: 'Created At' },
-
+  { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
+  { id: 'itemsPrice', numeric: true, disablePadding: false, label: 'Items Price' },
+  { id: 'totalPrice', numeric: true, disablePadding: false, label: 'Total Price' },
+  { id: 'paymentMethod', numeric: false, disablePadding: false, label: 'Payment Method' },
+  { id: 'paymentResult', numeric: false, disablePadding: false, label: 'Payment Status' },
+  { id: 'shippingMethod', numeric: false, disablePadding: false, label: 'Shipping' },
+  { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
+  { id: 'userId', numeric: false, disablePadding: false, label: 'User' },
 ];
 
 function EnhancedTableHead(props) {
@@ -206,9 +233,7 @@ EnhancedTableHead.propTypes = {
 };
   
   const rows = [];
-
-  users.map((item)=>{rows.push({id:item._id, name:item.name, email:item.email, admin: item.isAdmin ? "admin":"user" , created:item.createdAt})})
-
+  orders.map((item)=>{rows.push({shippingMethod:item.shippingMethod, itemsPrice:item.itemsPrice, userId:item.user._id, paymentStatus:item.paymentResult ? item.paymentResult.status:'Not Paid', paymentMethod:item.paymentMethod, status:item.status, totalPrice:item.totalPrice, id:item._id})})
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -258,28 +283,44 @@ EnhancedTableHead.propTypes = {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const removeRows = async (idArray) =>{
-    let usState = users
+    let ordersState = orders
     for(let i = 0; i < idArray.length; i++){
-      let itemIndex = users.indexOf(idArray[i]);
+      let itemIndex = orders.indexOf(idArray[i]);
       if(itemIndex > -1){
         try {
-          const {status} = await axios.delete(`/api/v1/users/${idArray[i]._id}`)
+          const {status} = await axios.delete(`/api/v1/orders/${idArray[i]._id}`)
           if(status === 200){
-            usState.splice(itemIndex, 1)
+            ordersState.splice(itemIndex, 1)
           }
           } catch (error) {
             console.log(error.message)
           }
       }
     }
-    setDeleteState(usState)
+    setDeleteState(ordersState)
     setSelected([])
+  }
+
+  const changeStatus = async (id, status) =>{
+    try {
+      const config = {
+        headers: {
+          'Content-Type':'application/json',
+        }
+      }
+      const orderStatus = await axios.post(`/api/v1/orders/admin/order/set-status/${id}`, {status: status}, config)
+      if(orderStatus.status === 200){
+        setOrderStatus([id], status)
+      }
+      } catch (error) {
+        console.log(error.message)
+      }
   }
 
   return (
     <>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} selected={selected} remove={removeRows} userState={users}/>
+        <EnhancedTableToolbar numSelected={selected.length} selected={selected} remove={removeRows} ordState={orders} statusValues={statusValues} setOrderStatus={setOrderStatus}/>
         <TableContainer>
           <Table
             className={classes.table}
@@ -320,20 +361,41 @@ EnhancedTableHead.propTypes = {
                         />
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">
-                        <Link href={`/admin/users/id?user=${row.id}`}>
+                        <Link href={`/admin/orders/id?product=${row.id}`}>
                           {row.id}
                         </Link>
                       </TableCell>
-                      {display.name.disp && <TableCell align="left">{row.name}</TableCell>}
-                      {display.email.disp && <TableCell align="left">{row.email}</TableCell>}
-                      {display.isAdmin.disp && <TableCell align="left">{row.admin}</TableCell>}
-                      {display.createdAt.disp && <TableCell align="right">{moment(row.created).format('YYYY.MM.DD.')}</TableCell>}
+                      {display.itemsPrice.disp && <TableCell align="right">{row.itemsPrice}</TableCell>}
+                      {display.totalPrice.disp &&<TableCell align="right">{row.totalPrice}</TableCell>}
+                      {display.paymentMethod.disp &&<TableCell align="left">{row.paymentMethod}</TableCell>}
+                      {display.paymentResult.disp &&<TableCell align="left">{row.paymentStatus}</TableCell>}
+                      {display.shippingMethod.disp &&<TableCell align="left">{row.shippingMethod}</TableCell>}
+                      {display.status.disp &&<TableCell align="left" className={classes.statusCell}>
+                        <FormControl className={classes.formControl, classes.searchField}>
+                          <Select
+                            labelId="select-search-col-label"
+                            id="select-search-col"
+                            value={row.status}
+                            onChange={(e)=> changeStatus(row.id, e.target.value)}>
+                            {statusValues.map((item)=>(
+                              <MenuItem key={item} value={item}>{item}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </TableCell>}
+                      {display.userId.disp &&
+                        <TableCell component="th" scope="row" align="left">
+                          <Link href={`/admin/users/id?user=${row.userId}`}>
+                            {row.userId}
+                          </Link>
+                        </TableCell>
+                      }
                     </StyledTableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <StyledTableRow style={{ height: 33 * emptyRows }}>
-                  <TableCell colSpan={7} />
+                  <TableCell colSpan={9} />
                 </StyledTableRow>
               )}
             </TableBody>

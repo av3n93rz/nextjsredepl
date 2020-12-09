@@ -73,7 +73,15 @@ const AdminDrawer = ({user, isMobile=false}) => {
       { user ? user.isAdmin ? (
         <>
           <List>
-            <Link href="/admin/UserList" underline='none'>
+            <Link href="/admin/orders/OrderList" underline='none'>
+              <ListItem button key={'OrderList'}>
+                <ListItemIcon>
+                  <ListIcon />
+                </ListItemIcon>
+                <ListItemText primary={'Order List'} className={classes.linkColor}/>
+              </ListItem>
+            </Link>
+            <Link href="/admin/users/UserList" underline='none'>
               <ListItem button key={'UserList'}>
                 <ListItemIcon>
                   <ListIcon />

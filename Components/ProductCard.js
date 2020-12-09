@@ -74,10 +74,22 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     height: '200px',
+  },
+  favorite:{
+      color: '#ff6d75',
+    '&:hover': {
+      color: '#ff3d47',
+    },
+  },
+  favGrey:{
+    color: 'rgba(0, 0, 0, 0.54)',
+    '&:hover': {
+      color: '#ff3d47',
+    },
   }
 }));
 
-const ProductCard = ({product, addToCartItems}) => {
+const ProductCard = ({product, addToCartItems, toggleFavorites, isFavorite}) => {
   const classes = useStyles();
 
   const AddToCartHandler = () =>{
@@ -91,6 +103,9 @@ const ProductCard = ({product, addToCartItems}) => {
     })
   }
 
+  const Favorites = () =>{
+    toggleFavorites(product._id)
+  }
 
   return (<Card className={classes.root}>
     <div className={classes.imgContainer}>
@@ -112,7 +127,7 @@ const ProductCard = ({product, addToCartItems}) => {
         ${product.price}
       </Typography>
       <div style={{marginRight:'0px'}}>
-        <IconButton aria-label="Add to favorites">
+        <IconButton aria-label="Add to favorites" className={isFavorite ? classes.favorite:classes.favGrey} onClick={Favorites}>
           <FavoriteIcon />
         </IconButton>
         <IconButton aria-label="Add to cart" onClick={AddToCartHandler}>
