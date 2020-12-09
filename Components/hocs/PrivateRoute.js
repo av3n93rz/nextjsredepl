@@ -13,9 +13,15 @@ export default WrappedComponent => {
   const hocComponent = ({ ...props }) => <WrappedComponent {...props} />;
   hocComponent.getInitialProps = async ({ req, res}) => {
     let productId
+    let userId
     if(req.query){
       if(req.query.product){
         productId=req.query.product
+      }
+    }
+    if(req.query){
+      if(req.query.user){
+        userId=req.query.user
       }
     }
     let user
@@ -47,7 +53,7 @@ export default WrappedComponent => {
         Router.replace(login);
       }
     } else if (WrappedComponent.getInitialProps) {
-      const wrappedProps = await WrappedComponent.getInitialProps({cookie, productId});
+      const wrappedProps = await WrappedComponent.getInitialProps({cookie, productId, userId});
       return { ...wrappedProps};
     }
 
