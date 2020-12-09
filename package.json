@@ -18,6 +18,7 @@
     "bcryptjs": "^2.4.3",
     "braintree": "^3.0.0",
     "braintree-web-drop-in-react": "^1.2.1",
+    "convert-excel-to-json": "^1.7.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
     "emotion": "^10.0.27",
