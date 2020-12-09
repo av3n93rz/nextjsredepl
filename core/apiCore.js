@@ -29,6 +29,38 @@ exports.listAdminProducts = (cookie) =>{
   })
 };
 
+exports.listStatusValues = (cookie) =>{
+  return fetch(`${AppUrl}/api/v1/orders/admin/status-values`, {
+    credentials: 'include',
+    method: 'GET',
+    headers:{
+      jwt:cookie
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+}
+
+exports.listAdminOrders = (cookie) =>{
+  return fetch(`${AppUrl}/api/v1/orders/admin`, {
+    credentials: 'include',
+    method: 'GET',
+    headers:{
+      jwt:cookie
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
 exports.listUsers = (cookie) =>{
   return fetch(`${AppUrl}/api/v1/users/admin`, {
     credentials: 'include',
@@ -81,6 +113,22 @@ exports.getSingleProduct = (id) =>{
   })
 };
 
+exports.getUserProfile = (id, cookie) =>{
+  return fetch(`${AppUrl}/api/v1/users/admin/${id}`, {
+    credentials: 'include',
+    method: 'GET',
+    headers:{
+      jwt:cookie
+    }
+  })
+  .then(response =>{
+    return response.json()
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+};
+
 exports.signin = user =>{
   return fetch(`/api/v1/users/login`, {
     method: 'POST',
@@ -115,6 +163,7 @@ exports.signupApi = user =>{
     console.log(err)
   })
 }
+
 
 exports.verify = hash =>{
   return fetch(`${AppUrl}/api/v1/users/verify/${hash}`, {
