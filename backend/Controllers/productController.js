@@ -3,6 +3,15 @@ const asyncHandler = require('express-async-handler')
 
 
 exports.getAllProducts = asyncHandler (async (req, res) => {
+  let sortField = 'name'
+  let sortOrder = 'asc'
+  let sortTag = 'name-asc'
+  if(req.query.sortBy !== 'undefined'){
+    const sortBy = req.query.sortBy.split('-')
+    sortField = sortBy[0]
+    sortOrder = sortBy[1]
+    sortTag = req.query.sortBy
+  }
   const pageSize = 12
   const page = Number(req.query.pageNumber) || 1
 
@@ -15,8 +24,15 @@ exports.getAllProducts = asyncHandler (async (req, res) => {
 
   const count = await Product.countDocuments({...keyword})
 
-  const products = await Product.find({...keyword}).limit(pageSize).skip(pageSize*(page-1))
-  res.json({products, page, pages: Math.ceil(count / pageSize)})
+  Product.find({...keyword}).collation({locale: "en" }).sort([[sortField, sortOrder]]).limit(pageSize).skip(pageSize*(page-1)).exec((err, products) => {
+    if (err) {
+        return res.status(400).json({
+            error: 'Products not found'
+        });
+    }
+    res.json({products, sortTag, page, pages: Math.ceil(count / pageSize)})
+});
+  
 })
 
 exports.getAdminProducts = asyncHandler (async (req, res) => {
