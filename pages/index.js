@@ -15,6 +15,12 @@ import Typography from '@material-ui/core/Typography';
 import axios from 'axios'
 import Pagination from '@material-ui/lab/Pagination';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { useRouter } from 'next/router'
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -94,19 +100,46 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     marginBottom: '15px',
     marginTop: '15px'
-  }
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
 }));
 
- const Home = ({products, userAuth, page, pages}) => {
+ const Home = ({products, userAuth, page, pages, sortTag}) => {
   const childNav = useRef(null);
   const BottomCart = useRef(null);
   const classes = useStyles();
   const [displayedProducts, setDisplayedProducts] = useState(products)
   const [currentPage, setCurrentPage] = useState(page)
+  const [sortBy, setSortBy] = useState(sortTag)
   const [firstLoad, setFirstLoad] = useState(true)
   const [loadingContent, setLoadingContent] = useState(false)
   const [favorites, setFavorites] = useState(userAuth && userAuth.favorites || [])
 
+  const router = useRouter()
+
+  const getPageProducts = async() =>{
+    try {
+      const data = await axios.get(`/api/v1/products?pageNumber=${currentPage}&sortBy=${sortBy}`)
+      if(data.status === 200){
+        setDisplayedProducts([...data.data.products])
+        setLoadingContent(false)
+        if(screen.availHeight > screen.availWidth){
+          document.getElementById('top_pagination').scrollIntoView({block:'center'})
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: "auto"
+          });
+        }
+      }
+      return
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(()=>{
     setDisplayedProducts([...displayedProducts])
@@ -114,29 +147,9 @@ const useStyles = makeStyles((theme) => ({
 
   useEffect(()=>{
     if(!firstLoad){
-      const getPageProducts = async() =>{
-        try {
-          const data = await axios.get(`/api/v1/products?pageNumber=${currentPage}`)
-          if(data.status === 200){
-            setDisplayedProducts([...data.data.products])
-            setLoadingContent(false)
-            if(screen.availHeight > screen.availWidth){
-              document.getElementById('top_pagination').scrollIntoView({block:'center'})
-            } else {
-              window.scrollTo({
-                top: 0,
-                behavior: "auto"
-              });
-            }
-          }
-          return
-        } catch (error) {
-          console.error(error)
-        }
-      }
       getPageProducts()
     }
-  }, [currentPage])
+  }, [currentPage, sortBy])
 
   const searchRequestHandler = (searchValue, category) => {
     console.log(searchValue, category)
@@ -188,11 +201,24 @@ const useStyles = makeStyles((theme) => ({
 
   const handlePages = (event, value) =>{
     if(value !== currentPage){
+      router.push({
+        query: { page: `${value}` }
+      }, 
+      undefined, { shallow: true }
+      )
       setLoadingContent(true)
       setDisplayedProducts([])
       setFirstLoad(false)
       setCurrentPage(value)
     }
+  }
+
+  const handleSort = (value) =>{
+    setLoadingContent(true)
+    setDisplayedProducts([])
+    setFirstLoad(false)
+    setCurrentPage('1')
+    setSortBy(value)
   }
 
   return (
@@ -204,19 +230,30 @@ const useStyles = makeStyles((theme) => ({
     <Navbar ref={childNav} user={userAuth && userAuth} trigger={searchRequestHandler} passToBottom={passToBottom}/>
       <Slider className={classes.slider}>
         <div className={classes.slide1}>
-          <Typography variant="h6" component="p" className={classes.slideTitle}>{products[11].name}</Typography>
+          <Typography variant="h6" component="p" className={classes.slideTitle}>{products[0].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[11].image[0].url}`} priority={true} alt={products[11].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[0].image[0].url}`} priority={true} alt={products[0].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
         <div className={classes.slide2}>
-        <Typography variant="h6" component="p" className={classes.slideTitle}>{products[2].name}</Typography>
+        <Typography variant="h6" component="p" className={classes.slideTitle}>{products[1].name}</Typography>
           <div className={classes.imgContainer}>
-            <Image src={`${products[2].image[0].url}`} priority={true} alt={products[2].name} unsized={true} className={classes.SlideImg}/>
+            <Image src={`${products[1].image[0].url}`} priority={true} alt={products[1].name} unsized={true} className={classes.SlideImg}/>
           </div>
         </div>
       </Slider>
       <Container maxWidth="lg" className={classes.mainContainer}>
+      <FormControl className={classes.formControl}>
+        <InputLabel htmlFor="grouped-select">Sort by</InputLabel>
+        <Select value={sortBy} id="grouped-select" onChange={e=>handleSort(e.target.value)}>
+          <ListSubheader>Name</ListSubheader>
+          <MenuItem value={'name-asc'}>A-Z</MenuItem>
+          <MenuItem value={'name-desc'}>Z-A</MenuItem>
+          <ListSubheader>Price</ListSubheader>
+          <MenuItem value={'price-asc'}>Low to High</MenuItem>
+          <MenuItem value={'price-desc'}>High to Low</MenuItem>
+        </Select>
+      </FormControl>
         <Pagination id='top_pagination' count={pages} page={currentPage} onChange={handlePages} className={classes.pagination}/>
         {loadingContent && <div className={classes.pagination}><CircularProgress color="secondary"/></div>}
         <Grid container spacing={4} style={{justifyContent:"center"}}>
