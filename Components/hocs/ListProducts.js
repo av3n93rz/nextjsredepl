@@ -3,8 +3,8 @@ import {listProducts} from '../../core/apiCore'
 
 export default WrappedComponent => {
   const hocComponent = ({ ...props }) => <WrappedComponent {...props} />;
-  hocComponent.getInitialProps = async () => {
-    const products = await listProducts()
+  hocComponent.getInitialProps = async (req, res) => {
+    const products = await listProducts(req.query)
     if(WrappedComponent.getInitialProps) {
       const wrappedProps = await WrappedComponent.getInitialProps(products);
       return { ...wrappedProps};
