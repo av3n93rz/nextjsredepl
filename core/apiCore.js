@@ -1,8 +1,8 @@
 
 const AppUrl = process.env.APP_URL
 
-exports.listProducts = () =>{
-  return fetch(`${AppUrl}/api/v1/products`, {
+exports.listProducts = (query) =>{
+  return fetch(`${AppUrl}/api/v1/products?pageNumber=${query.page && query.page}&sortBy=${query.sortBy && query.sortBy}`, {
     method: 'GET',
   })
   .then(response =>{
